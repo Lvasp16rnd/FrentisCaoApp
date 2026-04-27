@@ -1,0 +1,7 @@
+# AI assistant files
+.claude/
+walkthroughs/
+
+# IDE files
+.idea/
+*.iml
