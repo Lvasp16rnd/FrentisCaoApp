@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter/services.dart';
+
 /// TextField outlined do protótipo (border-radius 4, border #79747E)
 class AppTextField extends StatelessWidget {
   final String label;
@@ -8,6 +10,7 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final TextInputType? keyboardType;
   final Widget? suffixIcon;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AppTextField({
     super.key,
@@ -17,6 +20,7 @@ class AppTextField extends StatelessWidget {
     this.onChanged,
     this.keyboardType,
     this.suffixIcon,
+    this.inputFormatters,
   });
 
   @override
@@ -26,6 +30,7 @@ class AppTextField extends StatelessWidget {
       obscureText: obscureText,
       onChanged: onChanged,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
         suffixIcon: suffixIcon,

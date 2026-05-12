@@ -103,7 +103,7 @@ class _RegisterViewState extends State<RegisterView> {
                     vm.setName(_nameCtrl.text.trim());
                     vm.setEmail(_emailCtrl.text.trim());
                     vm.setPassword(_passCtrl.text);
-                    context.push('/onboarding/user-type');
+                    context.push('/onboarding/welcome');
                   },
                 ),
                 const SizedBox(height: 14),
@@ -140,7 +140,7 @@ class _RegisterViewState extends State<RegisterView> {
                   onPressed: () async {
                     final success = await vm.loginWithGoogle();
                     if (success && context.mounted) {
-                      context.push('/onboarding/user-type');
+                      context.push('/onboarding/welcome');
                     }
                   },
                 ),
