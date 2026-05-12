@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/models/user_model.dart';
 import 'package:frentis_cao/viewmodels/auth_view_model.dart';
+import 'package:frentis_cao/views/widgets/app_background.dart';
 import 'package:frentis_cao/views/widgets/app_buttons.dart';
 import 'package:frentis_cao/views/widgets/progression_bar.dart';
 
@@ -16,70 +17,73 @@ class UserTypeView extends StatelessWidget {
     final vm = context.watch<AuthViewModel>();
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            ProgressionBar(
-              currentStep: 1,
-              totalSteps: 4,
-              stepLabel: 'Passo 1: Tipo de Usuário',
-              onBack: () => context.pop(),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 30),
-                    Text(
-                      'Como você quer fazer parte dessa causa?',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'Selecione o tipo de usuário que representa você.',
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w200,
-                        color: AppColors.darkText,
+      body: AppBackground(
+        opacity: 0.4,
+        child: SafeArea(
+          child: Column(
+            children: [
+              ProgressionBar(
+                currentStep: 1,
+                totalSteps: 4,
+                stepLabel: 'Passo 1: Tipo de Usuário',
+                onBack: () => context.pop(),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 30),
+                      Text(
+                        'Como você quer fazer parte dessa causa?',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const Spacer(),
+                      const SizedBox(height: 5),
+                      Text(
+                        'Selecione o tipo de usuário que representa você.',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w200,
+                          color: AppColors.darkText,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Spacer(),
 
-                    // User type options (pill buttons from Figma)
-                    _UserTypeOption(
-                      label: 'Doador',
-                      selected: vm.selectedUserType == UserType.donor,
-                      onTap: () => vm.selectUserType(UserType.donor),
-                    ),
-                    const SizedBox(height: 12),
-                    _UserTypeOption(
-                      label: 'Protetor Independente',
-                      selected: vm.selectedUserType == UserType.independentProtector,
-                      onTap: () => vm.selectUserType(UserType.independentProtector),
-                    ),
-                    const SizedBox(height: 12),
-                    _UserTypeOption(
-                      label: 'ONG',
-                      selected: vm.selectedUserType == UserType.ong,
-                      onTap: () => vm.selectUserType(UserType.ong),
-                    ),
+                      // User type options (pill buttons from Figma)
+                      _UserTypeOption(
+                        label: 'Doador',
+                        selected: vm.selectedUserType == UserType.donor,
+                        onTap: () => vm.selectUserType(UserType.donor),
+                      ),
+                      const SizedBox(height: 12),
+                      _UserTypeOption(
+                        label: 'Protetor Independente',
+                        selected: vm.selectedUserType == UserType.independentProtector,
+                        onTap: () => vm.selectUserType(UserType.independentProtector),
+                      ),
+                      const SizedBox(height: 12),
+                      _UserTypeOption(
+                        label: 'ONG',
+                        selected: vm.selectedUserType == UserType.ong,
+                        onTap: () => vm.selectUserType(UserType.ong),
+                      ),
 
-                    const Spacer(),
-                    PrimaryButton(
-                      label: 'Próximo',
-                      onPressed: vm.selectedUserType != null
-                          ? () => context.push('/onboarding/terms')
-                          : null,
-                    ),
-                    const SizedBox(height: 40),
-                  ],
+                      const Spacer(),
+                      PrimaryButton(
+                        label: 'Próximo',
+                        onPressed: vm.selectedUserType != null
+                            ? () => context.push('/onboarding/terms')
+                            : null,
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

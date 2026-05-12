@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frentis_cao/core/app_theme.dart';
@@ -17,9 +19,31 @@ class _LoginViewState extends State<LoginView> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscure = true;
+  late final StreamSubscription<AuthState> _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+      final session = data.session;
+      if (session != null && mounted) {
+        final vm = context.read<AuthViewModel>();
+        final hasProfile = await vm.checkProfileExists(session.user.id);
+        if (mounted) {
+          if (hasProfile) {
+            context.go('/home');
+          } else {
+            // Não tem perfil ainda (login via Google recém-criado)
+            context.push('/onboarding/welcome');
+          }
+        }
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _authSubscription.cancel();
     _emailCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();

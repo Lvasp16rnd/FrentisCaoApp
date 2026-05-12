@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/viewmodels/auth_view_model.dart';
+import 'package:frentis_cao/views/widgets/app_background.dart';
 import 'package:frentis_cao/views/widgets/app_buttons.dart';
 import 'package:frentis_cao/views/widgets/progression_bar.dart';
 
@@ -48,82 +49,85 @@ Para dúvidas sobre estes termos, entre em contato através do aplicativo.
     final vm = context.watch<AuthViewModel>();
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            ProgressionBar(
-              currentStep: 2,
-              totalSteps: 4,
-              stepLabel: 'Passo 2: Termos de Privacidade',
-              onBack: () => context.pop(),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    Text(
-                      'Termos de Uso e Política de Privacidade',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 16),
+      body: AppBackground(
+        opacity: 0.4,
+        child: SafeArea(
+          child: Column(
+            children: [
+              ProgressionBar(
+                currentStep: 2,
+                totalSteps: 4,
+                stepLabel: 'Passo 2: Termos de Privacidade',
+                onBack: () => context.pop(),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 10),
+                      Text(
+                        'Termos de Uso e Política de Privacidade',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 16),
 
-                    // Scrollable terms box
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          border: Border.all(color: AppColors.border),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: SingleChildScrollView(
-                          child: Text(
-                            _termsText,
-                            style: Theme.of(context).textTheme.bodyMedium,
+                      // Scrollable terms box
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            border: Border.all(color: AppColors.border),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: SingleChildScrollView(
+                            child: Text(
+                              _termsText,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
+                      const SizedBox(height: 12),
 
-                    // Checkbox
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Li e concordo com os Termos de Uso e Política de Privacidade',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                      // Checkbox
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Li e concordo com os Termos de Uso e Política de Privacidade',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        Checkbox(
-                          value: vm.termsAccepted,
-                          onChanged: (_) => vm.toggleTermsAccepted(),
-                          activeColor: AppColors.primary,
-                          side: const BorderSide(
-                            color: AppColors.onSurfaceVariant,
-                            width: 2,
+                          const SizedBox(width: 6),
+                          Checkbox(
+                            value: vm.termsAccepted,
+                            onChanged: (_) => vm.toggleTermsAccepted(),
+                            activeColor: AppColors.primary,
+                            side: const BorderSide(
+                              color: AppColors.onSurfaceVariant,
+                              width: 2,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
 
-                    PrimaryButton(
-                      label: 'Próximo',
-                      onPressed: vm.termsAccepted
-                          ? () => context.push('/onboarding/user-data')
-                          : null,
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+                      PrimaryButton(
+                        label: 'Próximo',
+                        onPressed: vm.termsAccepted
+                            ? () => context.push('/onboarding/user-data')
+                            : null,
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
