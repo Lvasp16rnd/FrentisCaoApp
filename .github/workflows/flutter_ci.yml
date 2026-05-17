@@ -37,13 +37,9 @@ jobs:
         run: flutter pub get
 
         
-      
       - name: 🔐 Create dummy .env file
         working-directory: ./frentis_cao
         run: touch .env
-      - name: 🧹 Run Flutter Analyze
-        working-directory: ./frentis_cao
-        run: flutter analyze
 
       # 5. Verifica erros de sintaxe e código sujo (Linter)
       - name: 🧹 Run Flutter Analyze
