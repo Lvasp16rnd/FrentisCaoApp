@@ -36,6 +36,7 @@ jobs:
         working-directory: ./frentis_cao # Nome da pasta onde está o pubspec.yaml
         run: flutter pub get
 
+        
       
       - name: 🔐 Create dummy .env file
         working-directory: ./frentis_cao
