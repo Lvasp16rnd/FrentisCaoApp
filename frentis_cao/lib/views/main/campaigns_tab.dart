@@ -1,13 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frentis_cao/services/mock_data.dart';
+import 'package:provider/provider.dart';
+import 'package:frentis_cao/viewmodels/data_view_model.dart';
 import 'package:frentis_cao/views/widgets/campaign_card.dart';
 
-class CampaignsTab extends StatelessWidget {
+class CampaignsTab extends StatefulWidget {
   const CampaignsTab({super.key});
 
   @override
+  State<CampaignsTab> createState() => _CampaignsTabState();
+}
+
+class _CampaignsTabState extends State<CampaignsTab> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final vm = context.read<DataViewModel>();
+      if (vm.campaigns.isEmpty && !vm.isLoadingCampaigns) {
+        vm.fetchCampaigns();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final vm = context.watch<DataViewModel>();
+
     return SafeArea(
       child: CustomScrollView(
         slivers: [
@@ -20,24 +39,33 @@ class CampaignsTab extends StatelessWidget {
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final campaign = MockData.campaigns[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: CampaignCard(
-                      campaign: campaign,
-                      onTap: () => context.push('/campaign-detail', extra: campaign),
-                    ),
-                  );
-                },
-                childCount: MockData.campaigns.length,
+          if (vm.isLoadingCampaigns)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (vm.campaigns.isEmpty)
+            const SliverFillRemaining(
+              child: Center(child: Text('Nenhuma campanha cadastrada.')),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final campaign = vm.campaigns[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: CampaignCard(
+                        campaign: campaign,
+                        onTap: () => context.push('/campaign-detail', extra: campaign),
+                      ),
+                    );
+                  },
+                  childCount: vm.campaigns.length,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

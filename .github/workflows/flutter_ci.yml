@@ -1,0 +1,58 @@
+name: FrentisCao CI Pipeline
+
+# O fluxo será ativado quando alguém abrir um Pull Request para a branch 'develop' ou 'main'
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  build_and_test:
+    name: Flutter Lint & Test
+    runs-on: ubuntu-latest # Roda em um servidor Linux grátis do GitHub
+
+    steps:
+      # 1. Baixa o código do repositório
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configura o Java (Necessário para compilar coisas do Android no Flutter)
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. Instala o Flutter na máquina virtual
+      - name: 🦋 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable' # Usa a versão estável mais recente
+          cache: true # Usa cache para deixar as próximas execuções mais rápidas
+
+      # 4. Baixa os pacotes do pubspec.yaml
+      - name: 📦 Install Dependencies
+        working-directory: ./frentis_cao # Nome da pasta onde está o pubspec.yaml
+        run: flutter pub get
+
+        
+      - name: 🔐 Create dummy .env file
+        working-directory: ./frentis_cao
+        run: touch .env
+
+      # 5. Verifica erros de sintaxe e código sujo (Linter)
+      - name: 🧹 Run Flutter Analyze
+        working-directory: ./frentis_cao
+        run: flutter analyze
+
+      # 6. Roda os testes unitários (Se você tiver criado algum em /test)
+      - name: 🧪 Run Tests
+        working-directory: ./frentis_cao
+        run: flutter test
+
+      # 7. (Opcional) Faz um build de teste do APK só para garantir que compila sem erros
+      # Descomente as linhas abaixo se quiser que o GitHub valide se o app gera o APK com sucesso.
+      # - name: 🏗️ Build APK Test
+      #   working-directory: ./frentis_cao
+      #   run: flutter build apk --debug

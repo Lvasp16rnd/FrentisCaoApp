@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:go_router/go_router.dart';
 
@@ -84,7 +85,10 @@ class ProfileTab extends StatelessWidget {
                     icon: Icons.logout,
                     label: 'Logout',
                     isLogout: true,
-                    onTap: () => context.go('/login'),
+                    onTap: () async {
+                      await Supabase.instance.client.auth.signOut();
+                      if (context.mounted) context.go('/login');
+                    },
                   ),
                 ],
               ),
