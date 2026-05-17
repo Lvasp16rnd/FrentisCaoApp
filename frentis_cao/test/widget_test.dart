@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frentis_cao/main.dart';
 
 void main() {
   testWidgets('Dummy test for CI', (WidgetTester tester) async {
