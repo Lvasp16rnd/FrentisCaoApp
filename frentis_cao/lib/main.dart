@@ -9,17 +9,81 @@ import 'package:frentis_cao/viewmodels/data_view_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Carrega variáveis de ambiente
-  await dotenv.load(fileName: ".env");
 
-  // Inicializa Supabase
-  await Supabase.initialize(
-    url: dotenv.get('SUPABASE_URL'),
-    anonKey: dotenv.get('SUPABASE_ANON_KEY'),
-  );
+  try {
+    await dotenv.load(fileName: '.env');
 
-  runApp(const FrentisCaoApp());
+    final supabaseUrl = dotenv.env['SUPABASE_URL']?.trim() ?? '';
+    final supabaseKey =
+        dotenv.env['SUPABASE_ANON_KEY']?.trim() ??
+        dotenv.env['SUPABASE_PUBLISHABLE_KEY']?.trim() ??
+        '';
+
+    if (supabaseUrl.isEmpty || supabaseKey.isEmpty) {
+      runApp(
+        const FrentisCaoBootstrapError(
+          message:
+              'Configure SUPABASE_URL e SUPABASE_ANON_KEY ou '
+              'SUPABASE_PUBLISHABLE_KEY no arquivo .env.',
+        ),
+      );
+      return;
+    }
+
+    await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+
+    runApp(const FrentisCaoApp());
+  } catch (error) {
+    runApp(FrentisCaoBootstrapError(message: 'Falha ao iniciar o app: $error'));
+  }
+}
+
+class FrentisCaoBootstrapError extends StatelessWidget {
+  final String message;
+
+  const FrentisCaoBootstrapError({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'FrentisCao',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      home: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: AppColors.warning,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Configuracao pendente',
+                    style: AppTheme.light.textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(message, style: AppTheme.light.textTheme.bodyLarge),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Edite frentis_cao/.env usando frentis_cao/.env.example '
+                    'como base.',
+                    style: AppTheme.light.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class FrentisCaoApp extends StatelessWidget {
@@ -33,7 +97,7 @@ class FrentisCaoApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DataViewModel()),
       ],
       child: MaterialApp.router(
-        title: 'FrentisCão',
+        title: 'FrentisCao',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         routerConfig: AppRouter.router,
