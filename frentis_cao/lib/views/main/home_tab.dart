@@ -105,7 +105,7 @@ class _HomeTabState extends State<HomeTab> {
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
 
           // Posts feed
-          if (true)
+          if (vm.isLoadingPosts)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               sliver: SliverList(
