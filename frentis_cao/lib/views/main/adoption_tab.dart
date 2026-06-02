@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frentis_cao/viewmodels/data_view_model.dart';
 import 'package:frentis_cao/views/widgets/adoption_card.dart';
+import 'package:frentis_cao/views/widgets/skeleton_cards.dart';
 
 class AdoptionTab extends StatefulWidget {
   const AdoptionTab({super.key});
@@ -40,8 +41,20 @@ class _AdoptionTabState extends State<AdoptionTab> {
             ),
           ),
           if (vm.isLoadingAnimals)
-            const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.75,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => const AdoptionCardSkeleton(),
+                  childCount: 6,
+                ),
+              ),
             )
           else if (vm.animals.isEmpty)
             const SliverFillRemaining(
@@ -57,16 +70,13 @@ class _AdoptionTabState extends State<AdoptionTab> {
                   crossAxisSpacing: 12,
                   childAspectRatio: 0.75,
                 ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final animal = vm.animals[index];
-                    return AdoptionCard(
-                      animal: animal,
-                      onTap: () => context.push('/animal-detail', extra: animal),
-                    );
-                  },
-                  childCount: vm.animals.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final animal = vm.animals[index];
+                  return AdoptionCard(
+                    animal: animal,
+                    onTap: () => context.push('/animal-detail', extra: animal),
+                  );
+                }, childCount: vm.animals.length),
               ),
             ),
         ],
