@@ -9,6 +9,7 @@ import 'package:frentis_cao/views/onboarding/terms_view.dart';
 import 'package:frentis_cao/views/onboarding/user_data_view.dart';
 import 'package:frentis_cao/views/onboarding/verification_code_view.dart';
 import 'package:frentis_cao/views/onboarding/completion_screen.dart';
+import 'package:frentis_cao/views/main/favorites_view.dart';
 import 'package:frentis_cao/views/main/main_shell.dart';
 import 'package:frentis_cao/views/details/detail_views.dart';
 
@@ -17,16 +18,15 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     initialLocation: '/login',
-    errorBuilder: (context, state) => const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(), // Uma tela neutra enquanto o Supabase processa o deep link
-      ),
-    ),
+    errorBuilder:
+        (context, state) => const Scaffold(
+          body: Center(
+            child:
+                CircularProgressIndicator(), // Uma tela neutra enquanto o Supabase processa o deep link
+          ),
+        ),
     routes: [
-      GoRoute(
-        path: '/',
-        redirect: (context, state) => '/login',
-      ),
+      GoRoute(path: '/', redirect: (context, state) => '/login'),
       GoRoute(
         path: '/login',
         name: 'login',
@@ -73,22 +73,29 @@ class AppRouter {
         builder: (context, state) => const MainShell(),
       ),
       GoRoute(
+        path: '/favorites',
+        name: 'favorites',
+        builder: (context, state) => const FavoritesView(),
+      ),
+      GoRoute(
         path: '/post-detail',
         name: 'postDetail',
-        builder: (context, state) =>
-            PostDetailView(post: state.extra! as PostModel),
+        builder:
+            (context, state) => PostDetailView(post: state.extra! as PostModel),
       ),
       GoRoute(
         path: '/animal-detail',
         name: 'animalDetail',
-        builder: (context, state) =>
-            AnimalDetailView(animal: state.extra! as AnimalModel),
+        builder:
+            (context, state) =>
+                AnimalDetailView(animal: state.extra! as AnimalModel),
       ),
       GoRoute(
         path: '/campaign-detail',
         name: 'campaignDetail',
-        builder: (context, state) =>
-            CampaignDetailView(campaign: state.extra! as CampaignModel),
+        builder:
+            (context, state) =>
+                CampaignDetailView(campaign: state.extra! as CampaignModel),
       ),
     ],
   );

@@ -26,4 +26,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/background/
+    - assets/pics/Cadastro/animal-shelter/
+    - assets/pics/Cadastro/cat-and-dog/
+    - assets/pics/Login/adopt-a-pet/
     - .env

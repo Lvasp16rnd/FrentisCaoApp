@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frentis_cao/viewmodels/data_view_model.dart';
 import 'package:frentis_cao/views/widgets/adoption_card.dart';
+import 'package:frentis_cao/views/widgets/empty_state.dart';
 import 'package:frentis_cao/views/widgets/skeleton_cards.dart';
 
 class AdoptionTab extends StatefulWidget {
@@ -58,7 +59,14 @@ class _AdoptionTabState extends State<AdoptionTab> {
             )
           else if (vm.animals.isEmpty)
             const SliverFillRemaining(
-              child: Center(child: Text('Nenhum animal cadastrado.')),
+              hasScrollBody: false,
+              child: EmptyState(
+                icon: Icons.pets,
+                title: 'Nenhum animal disponível no momento',
+                message:
+                    'Assim que uma ONG ou protetor cadastrar um animal, ele '
+                    'aparecerá aqui para adoção.',
+              ),
             )
           else
             SliverPadding(
