@@ -100,7 +100,6 @@ class ProfileTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   _ProfileOption(
-<<<<<<< HEAD
                     icon: Icons.payments_outlined, 
                     label: 'Últimas Doações', 
                     onTap: () {
@@ -110,11 +109,6 @@ class ProfileTab extends StatelessWidget {
                         ),
                       );
                     },
-=======
-                    icon: Icons.payments_outlined,
-                    label: 'Últimas Doações',
-                    onTap: () {},
->>>>>>> develop
                   ),
                   const SizedBox(height: 4),
                   _ProfileOption(

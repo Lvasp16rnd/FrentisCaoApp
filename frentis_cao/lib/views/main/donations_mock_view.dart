@@ -45,7 +45,7 @@ class DonationsMockView extends StatelessWidget {
       body: ListView.separated(
         padding: const EdgeInsets.all(16.0),
         itemCount: mockDonations.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final donation = mockDonations[index];
           final isProcessing = donation['status'] == 'Processando';
