@@ -30,7 +30,7 @@ Future<void> main() async {
       return;
     }
 
-    await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+    await Supabase.initialize(url: supabaseUrl, publishableKey: supabaseKey);
 
     runApp(const FrentisCaoApp());
   } catch (error) {
