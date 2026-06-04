@@ -3,9 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/views/widgets/app_background.dart';
 import 'package:frentis_cao/views/widgets/app_buttons.dart';
+import 'package:frentis_cao/views/widgets/progression_bar.dart';
 
-/// Completion screen que aparece após o usuário concluir toda a verificação.
-/// Mostra mensagem de sucesso "Tudo certo, hora de começar!" com ilustração e botão para ir à home.
 class CompletionScreen extends StatelessWidget {
   const CompletionScreen({super.key});
 
@@ -17,84 +16,42 @@ class CompletionScreen extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
+              const ProgressionBar(
+                currentStep: 5,
+                totalSteps: 5,
+                stepLabel: 'Passo 5: Conclusão',
+              ),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 40),
-
-                        // Success icon
-                        Container(
-                          height: 80,
-                          width: 80,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check_circle,
-                            size: 50,
-                            color: AppColors.primary,
-                          ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 54),
+                      Image.asset(
+                        'assets/pics/Cadastro/cat-and-dog/cuate.png',
+                        width: 330,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 34),
+                      _CompletionMessage(
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineMedium?.copyWith(
+                          color: AppColors.darkText,
+                          fontSize: 25,
+                          fontWeight: FontWeight.w800,
+                          height: 1.15,
                         ),
-
-                        const SizedBox(height: 40),
-
-                        // Illustration placeholder - cat-and-dog/cuate style
-                        Container(
-                          height: 250,
-                          width: 280,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Icon(
-                            Icons.pets,
-                            size: 100,
-                            color: AppColors.primary,
-                          ),
-                        ),
-
-                        const SizedBox(height: 50),
-
-                        // Main message
-                        Text(
-                          'Tudo certo, hora de começar!',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: AppColors.darkText,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 25,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        Text(
-                          'Seu cadastro foi concluído com sucesso! 🎉\n\nAgora você pode explorar o mundo de adoções, campanhas e fazer a diferença na vida de muitos animais.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.onSurfaceVariant,
-                            fontSize: 14,
-                            height: 1.5,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-
-                        const SizedBox(height: 60),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
                   ),
                 ),
               ),
-
-              // Button
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                padding: const EdgeInsets.fromLTRB(23, 12, 23, 45),
                 child: PrimaryButton(
-                  label: 'Explorar Home',
+                  label: 'Concluir',
                   onPressed: () => context.go('/home'),
                 ),
               ),
@@ -106,3 +63,25 @@ class CompletionScreen extends StatelessWidget {
   }
 }
 
+class _CompletionMessage extends StatelessWidget {
+  final TextStyle? style;
+
+  const _CompletionMessage({required this.style});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          const TextSpan(text: 'Tudo certo, hora de\n'),
+          TextSpan(
+            text: 'começar!',
+            style: style?.copyWith(color: AppColors.warning),
+          ),
+        ],
+      ),
+      textAlign: TextAlign.center,
+      style: style,
+    );
+  }
+}

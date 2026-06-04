@@ -29,7 +29,11 @@ class ProfileTab extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(Icons.person, size: 60, color: AppColors.primary),
+              child: const Icon(
+                Icons.person,
+                size: 60,
+                color: AppColors.primary,
+              ),
             ),
             const SizedBox(height: 12),
 
@@ -71,15 +75,32 @@ class ProfileTab extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 7),
               child: Column(
                 children: [
-                  _ProfileOption(icon: Icons.favorite_border, label: 'Favoritos', onTap: () {}),
-                  const SizedBox(height: 4),
-                  _ProfileOption(icon: Icons.pets, label: 'Adoções', onTap: () {}),
-                  const SizedBox(height: 4),
-                  _ProfileOption(icon: Icons.access_time_filled, label: 'Doações Recorrentes', onTap: () {}),
-                  const SizedBox(height: 4),
-                  _ProfileOption(icon: Icons.event, label: 'Campanhas Salvas', onTap: () {}),
+                  _ProfileOption(
+                    icon: Icons.favorite_border,
+                    label: 'Favoritos',
+                    onTap: () => context.push('/favorites'),
+                  ),
                   const SizedBox(height: 4),
                   _ProfileOption(
+                    icon: Icons.pets,
+                    label: 'Adoções',
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 4),
+                  _ProfileOption(
+                    icon: Icons.access_time_filled,
+                    label: 'Doações Recorrentes',
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 4),
+                  _ProfileOption(
+                    icon: Icons.event,
+                    label: 'Campanhas Salvas',
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 4),
+                  _ProfileOption(
+<<<<<<< HEAD
                     icon: Icons.payments_outlined, 
                     label: 'Últimas Doações', 
                     onTap: () {
@@ -89,6 +110,11 @@ class ProfileTab extends StatelessWidget {
                         ),
                       );
                     },
+=======
+                    icon: Icons.payments_outlined,
+                    label: 'Últimas Doações',
+                    onTap: () {},
+>>>>>>> develop
                   ),
                   const SizedBox(height: 4),
                   _ProfileOption(
@@ -149,7 +175,11 @@ class _ProfileOption extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Icon(Icons.chevron_right, size: 20, color: AppColors.secondaryContainer),
+            const Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: AppColors.secondaryContainer,
+            ),
           ],
         ),
       ),

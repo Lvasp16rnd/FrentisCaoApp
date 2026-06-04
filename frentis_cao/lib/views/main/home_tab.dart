@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/viewmodels/data_view_model.dart';
 import 'package:frentis_cao/views/widgets/ong_post_card.dart';
+import 'package:frentis_cao/views/widgets/skeleton_cards.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -70,7 +71,11 @@ class _HomeTabState extends State<HomeTab> {
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Icon(Icons.tune, color: AppColors.white, size: 20),
+                    child: const Icon(
+                      Icons.tune,
+                      color: AppColors.white,
+                      size: 20,
+                    ),
                   ),
                 ],
               ),
@@ -101,8 +106,16 @@ class _HomeTabState extends State<HomeTab> {
 
           // Posts feed
           if (vm.isLoadingPosts)
-            const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                    child: OngPostCardSkeleton(),
+                  );
+                }, childCount: 3),
+              ),
             )
           else if (vm.posts.isEmpty)
             const SliverFillRemaining(
@@ -112,19 +125,16 @@ class _HomeTabState extends State<HomeTab> {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final post = vm.posts[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: OngPostCard(
-                        post: post,
-                        onTap: () => context.push('/post-detail', extra: post),
-                      ),
-                    );
-                  },
-                  childCount: vm.posts.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final post = vm.posts[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: OngPostCard(
+                      post: post,
+                      onTap: () => context.push('/post-detail', extra: post),
+                    ),
+                  );
+                }, childCount: vm.posts.length),
               ),
             ),
         ],

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frentis_cao/viewmodels/data_view_model.dart';
 import 'package:frentis_cao/views/widgets/campaign_card.dart';
+import 'package:frentis_cao/views/widgets/skeleton_cards.dart';
 
 class CampaignsTab extends StatefulWidget {
   const CampaignsTab({super.key});
@@ -40,8 +41,16 @@ class _CampaignsTabState extends State<CampaignsTab> {
             ),
           ),
           if (vm.isLoadingCampaigns)
-            const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: CampaignCardSkeleton(),
+                  );
+                }, childCount: 4),
+              ),
             )
           else if (vm.campaigns.isEmpty)
             const SliverFillRemaining(
@@ -51,19 +60,18 @@ class _CampaignsTabState extends State<CampaignsTab> {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final campaign = vm.campaigns[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: CampaignCard(
-                        campaign: campaign,
-                        onTap: () => context.push('/campaign-detail', extra: campaign),
-                      ),
-                    );
-                  },
-                  childCount: vm.campaigns.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final campaign = vm.campaigns[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: CampaignCard(
+                      campaign: campaign,
+                      onTap:
+                          () =>
+                              context.push('/campaign-detail', extra: campaign),
+                    ),
+                  );
+                }, childCount: vm.campaigns.length),
               ),
             ),
         ],
