@@ -56,7 +56,7 @@ Para dúvidas sobre estes termos, entre em contato através do aplicativo.
             children: [
               ProgressionBar(
                 currentStep: 2,
-                totalSteps: 4,
+                totalSteps: 5,
                 stepLabel: 'Passo 2: Termos de Privacidade',
                 onBack: () => context.pop(),
               ),
@@ -72,8 +72,6 @@ Para dúvidas sobre estes termos, entre em contato através do aplicativo.
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
                       const SizedBox(height: 16),
-
-                      // Scrollable terms box
                       Expanded(
                         child: Container(
                           padding: const EdgeInsets.all(10),
@@ -91,8 +89,6 @@ Para dúvidas sobre estes termos, entre em contato através do aplicativo.
                         ),
                       ),
                       const SizedBox(height: 12),
-
-                      // Checkbox
                       Row(
                         children: [
                           Expanded(
@@ -113,17 +109,18 @@ Para dúvidas sobre estes termos, entre em contato através do aplicativo.
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-
-                      PrimaryButton(
-                        label: 'Próximo',
-                        onPressed: vm.termsAccepted
-                            ? () => context.push('/onboarding/user-data')
-                            : null,
-                      ),
-                      const SizedBox(height: 24),
                     ],
                   ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+                child: PrimaryButton(
+                  label: 'Próximo',
+                  onPressed:
+                      vm.termsAccepted
+                          ? () => context.push('/onboarding/user-data')
+                          : null,
                 ),
               ),
             ],

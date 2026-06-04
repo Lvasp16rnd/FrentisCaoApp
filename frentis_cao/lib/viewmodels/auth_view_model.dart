@@ -3,30 +3,25 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frentis_cao/models/user_model.dart';
 import 'package:frentis_cao/services/supabase_auth_service.dart';
 
-/// ViewModel de autenticação usando ChangeNotifier (Provider).
 class AuthViewModel extends ChangeNotifier {
   final SupabaseAuthService _authService = SupabaseAuthService();
 
-  // State
   bool _isLoading = false;
   String? _error;
   UserType? _selectedUserType;
   bool _termsAccepted = false;
 
-  // Form fields
   String _name = '';
   String _email = '';
   String _password = '';
   String _phone = '';
 
-  // Getters
   bool get isLoading => _isLoading;
   String? get error => _error;
   UserType? get selectedUserType => _selectedUserType;
   bool get termsAccepted => _termsAccepted;
   String get phone => _phone;
 
-  // Setters
   void setName(String value) => _name = value;
   void setEmail(String value) => _email = value;
   void setPassword(String value) => _password = value;
@@ -42,7 +37,6 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Login com email e senha
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     _error = null;
@@ -51,7 +45,7 @@ class AuthViewModel extends ChangeNotifier {
     try {
       final success = await _authService.login(email, password);
       if (!success) {
-        _error = 'Email ou senha inválidos';
+        _error = 'Email ou senha invalidos';
       }
       return success;
     } catch (e) {
@@ -63,7 +57,6 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  /// Login com Google
   Future<bool> loginWithGoogle() async {
     _isLoading = true;
     _error = null;
@@ -82,7 +75,6 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  /// Cadastro ou Complemento de Perfil
   Future<bool> register() async {
     _isLoading = true;
     _error = null;
@@ -91,15 +83,13 @@ class AuthViewModel extends ChangeNotifier {
     try {
       bool success = false;
       final currentUser = Supabase.instance.client.auth.currentUser;
-      
-      // Se já tem usuário logado (ex: via Google Auth), apenas completa o perfil
+
       if (currentUser != null) {
         success = await _authService.completeProfile(
           name: _name,
           userType: _selectedUserType ?? UserType.donor,
         );
       } else {
-        // Fluxo normal de email/senha
         success = await _authService.register(
           name: _name,
           email: _email,
@@ -114,9 +104,10 @@ class AuthViewModel extends ChangeNotifier {
       return success;
     } catch (e) {
       if (e.toString().contains('42501')) {
-        _error = 'Erro de permissão no banco (RLS). Contate o suporte.';
-      } else if (e.toString().contains('already registered') || e.toString().contains('User already exists')) {
-        _error = 'Este e-mail já está em uso. Faça login.';
+        _error = 'Erro de permissao no banco (RLS). Contate o suporte.';
+      } else if (e.toString().contains('already registered') ||
+          e.toString().contains('User already exists')) {
+        _error = 'Este e-mail ja esta em uso. Faca login.';
       } else {
         _error = 'Erro no cadastro. Verifique os dados.';
         debugPrint('Detalhe do erro: $e');
@@ -128,12 +119,10 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  /// Verifica a existência de perfil
   Future<bool> checkProfileExists(String userId) async {
     return await _authService.checkProfileExists(userId);
   }
 
-  /// Verificação de código 2FA
   Future<bool> verifyCode(String code) async {
     _isLoading = true;
     _error = null;
@@ -142,9 +131,8 @@ class AuthViewModel extends ChangeNotifier {
     try {
       final success = await _authService.verifyCode(_email, code);
       if (!success) {
-        _error = 'Código inválido';
+        _error = 'Codigo invalido';
       } else {
-        // Sessão criada com sucesso. Agora inserimos o perfil público!
         await _authService.completeProfile(
           name: _name,
           userType: _selectedUserType ?? UserType.donor,
@@ -152,7 +140,7 @@ class AuthViewModel extends ChangeNotifier {
       }
       return success;
     } catch (e) {
-      _error = 'Erro na verificação: $e';
+      _error = 'Erro na verificacao: $e';
       return false;
     } finally {
       _isLoading = false;

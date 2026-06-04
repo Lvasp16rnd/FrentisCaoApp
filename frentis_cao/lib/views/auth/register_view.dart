@@ -1,155 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:frentis_cao/core/app_theme.dart';
-import 'package:frentis_cao/viewmodels/auth_view_model.dart';
+import 'package:frentis_cao/views/widgets/app_background.dart';
 import 'package:frentis_cao/views/widgets/app_buttons.dart';
-import 'package:frentis_cao/views/widgets/app_text_field.dart';
 
-class RegisterView extends StatefulWidget {
+class RegisterView extends StatelessWidget {
   const RegisterView({super.key});
 
   @override
-  State<RegisterView> createState() => _RegisterViewState();
-}
-
-class _RegisterViewState extends State<RegisterView> {
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-  bool _obscure = true;
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _emailCtrl.dispose();
-    _passCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final vm = context.watch<AuthViewModel>();
-
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                const SizedBox(height: 80),
-                // Illustration placeholder
-                Container(
-                  height: 200,
-                  width: 250,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(
-                    Icons.home_outlined,
-                    size: 80,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // Name
-                AppTextField(
-                  label: 'Nome completo',
-                  controller: _nameCtrl,
-                  onChanged: vm.setName,
-                ),
-                const SizedBox(height: 10),
-
-                // Email
-                AppTextField(
-                  label: 'E-mail',
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: vm.setEmail,
-                ),
-                const SizedBox(height: 10),
-
-                // Password
-                AppTextField(
-                  label: 'Senha',
-                  controller: _passCtrl,
-                  obscureText: _obscure,
-                  onChanged: vm.setPassword,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscure ? Icons.visibility_off : Icons.visibility,
-                      color: AppColors.onSurfaceVariant,
+      body: AppBackground(
+        opacity: 0.38,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 12, top: 4),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: AppColors.primary,
                     ),
-                    onPressed: () => setState(() => _obscure = !_obscure),
+                    iconSize: 28,
+                    splashRadius: 24,
+                    onPressed: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/login');
+                      }
+                    },
                   ),
                 ),
-                const SizedBox(height: 26),
-
-                if (vm.error != null) ...[
-                  Text(
-                    vm.error!,
-                    style: const TextStyle(color: AppColors.error, fontSize: 13),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-
-                PrimaryButton(
-                  label: 'Cadastrar',
-                  isLoading: vm.isLoading,
-                  onPressed: () {
-                    vm.setName(_nameCtrl.text.trim());
-                    vm.setEmail(_emailCtrl.text.trim());
-                    vm.setPassword(_passCtrl.text);
-                    context.push('/onboarding/welcome');
-                  },
-                ),
-                const SizedBox(height: 14),
-
-                GestureDetector(
-                  onTap: () => context.pop(),
-                  child: RichText(
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      children: const [
-                        TextSpan(text: 'Já possui conta? '),
-                        TextSpan(
-                          text: 'Entrar',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                          ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 24),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 48),
+                      Image.asset(
+                        'assets/pics/Cadastro/animal-shelter/bro.png',
+                        width: 330,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 38),
+                      _Tagline(
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineMedium?.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          height: 1.16,
+                          color: AppColors.darkText,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 14),
-
-                const SizedBox(
-                  width: 230,
-                  child: Divider(color: AppColors.surfaceDim),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(23, 12, 23, 45),
+                child: PrimaryButton(
+                  label: 'Continuar',
+                  onPressed: () => context.push('/onboarding/user-type'),
                 ),
-                const SizedBox(height: 14),
-
-                AppOutlineButton(
-                  label: 'Cadastrar com Google',
-                  icon: const Icon(Icons.g_mobiledata, size: 24),
-                  onPressed: () async {
-                    final success = await vm.loginWithGoogle();
-                    if (success && context.mounted) {
-                      context.push('/onboarding/welcome');
-                    }
-                  },
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Tagline extends StatelessWidget {
+  final TextStyle? style;
+
+  const _Tagline({required this.style});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          const TextSpan(text: 'Conectando quem '),
+          TextSpan(
+            text: 'ama',
+            style: style?.copyWith(color: const Color(0xFFE74C3C)),
+          ),
+          const TextSpan(text: '\ncom quem precisa de um\n'),
+          TextSpan(
+            text: 'lar',
+            style: style?.copyWith(color: const Color(0xFF2ECC71)),
+          ),
+          const TextSpan(text: '.'),
+        ],
+      ),
+      textAlign: TextAlign.center,
+      style: style,
     );
   }
 }

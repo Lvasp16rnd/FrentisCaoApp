@@ -24,7 +24,9 @@ class _LoginViewState extends State<LoginView> {
   @override
   void initState() {
     super.initState();
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
+      data,
+    ) async {
       final session = data.session;
       if (session != null && mounted) {
         final vm = context.read<AuthViewModel>();
@@ -61,19 +63,11 @@ class _LoginViewState extends State<LoginView> {
             child: Column(
               children: [
                 const SizedBox(height: 80),
-                // Illustration placeholder
-                Container(
+                Image.asset(
+                  'assets/pics/Login/adopt-a-pet/bro.png',
                   height: 200,
                   width: 250,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(
-                    Icons.pets,
-                    size: 80,
-                    color: AppColors.primary,
-                  ),
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 40),
 
@@ -104,7 +98,10 @@ class _LoginViewState extends State<LoginView> {
                 if (vm.error != null) ...[
                   Text(
                     vm.error!,
-                    style: const TextStyle(color: AppColors.error, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppColors.error,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 8),
                 ],

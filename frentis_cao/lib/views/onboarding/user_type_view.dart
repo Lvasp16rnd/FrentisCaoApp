@@ -24,7 +24,7 @@ class UserTypeView extends StatelessWidget {
             children: [
               ProgressionBar(
                 currentStep: 1,
-                totalSteps: 4,
+                totalSteps: 5,
                 stepLabel: 'Passo 1: Tipo de Usuário',
                 onBack: () => context.pop(),
               ),
@@ -50,8 +50,6 @@ class UserTypeView extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                       const Spacer(),
-
-                      // User type options (pill buttons from Figma)
                       _UserTypeOption(
                         label: 'Doador',
                         selected: vm.selectedUserType == UserType.donor,
@@ -60,8 +58,13 @@ class UserTypeView extends StatelessWidget {
                       const SizedBox(height: 12),
                       _UserTypeOption(
                         label: 'Protetor Independente',
-                        selected: vm.selectedUserType == UserType.independentProtector,
-                        onTap: () => vm.selectUserType(UserType.independentProtector),
+                        selected:
+                            vm.selectedUserType ==
+                            UserType.independentProtector,
+                        onTap:
+                            () => vm.selectUserType(
+                              UserType.independentProtector,
+                            ),
                       ),
                       const SizedBox(height: 12),
                       _UserTypeOption(
@@ -69,17 +72,19 @@ class UserTypeView extends StatelessWidget {
                         selected: vm.selectedUserType == UserType.ong,
                         onTap: () => vm.selectUserType(UserType.ong),
                       ),
-
                       const Spacer(),
-                      PrimaryButton(
-                        label: 'Próximo',
-                        onPressed: vm.selectedUserType != null
-                            ? () => context.push('/onboarding/terms')
-                            : null,
-                      ),
-                      const SizedBox(height: 40),
                     ],
                   ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+                child: PrimaryButton(
+                  label: 'Próximo',
+                  onPressed:
+                      vm.selectedUserType != null
+                          ? () => context.push('/onboarding/terms')
+                          : null,
                 ),
               ),
             ],

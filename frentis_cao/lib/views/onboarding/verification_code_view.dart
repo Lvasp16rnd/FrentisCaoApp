@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/viewmodels/auth_view_model.dart';
@@ -16,9 +15,16 @@ class VerificationCodeView extends StatefulWidget {
 }
 
 class _VerificationCodeViewState extends State<VerificationCodeView> {
-  final List<TextEditingController> _controllers =
-      List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  static const _codeLength = 8;
+
+  final List<TextEditingController> _controllers = List.generate(
+    _codeLength,
+    (_) => TextEditingController(),
+  );
+  final List<FocusNode> _focusNodes = List.generate(
+    _codeLength,
+    (_) => FocusNode(),
+  );
 
   @override
   void dispose() {
@@ -33,6 +39,47 @@ class _VerificationCodeViewState extends State<VerificationCodeView> {
 
   String get _code => _controllers.map((c) => c.text).join();
 
+  void _handleCodeChanged(String value, int index) {
+    final sanitized = value.replaceAll(RegExp(r'\s'), '');
+
+    if (sanitized.length > 1) {
+      final startIndex = sanitized.length >= _codeLength ? 0 : index;
+      _fillCode(sanitized, startIndex);
+      return;
+    }
+
+    if (sanitized != value) {
+      _controllers[index].text = sanitized;
+    }
+
+    if (sanitized.isNotEmpty && index < _codeLength - 1) {
+      _focusNodes[index + 1].requestFocus();
+    }
+    if (sanitized.isEmpty && index > 0) {
+      _focusNodes[index - 1].requestFocus();
+    }
+  }
+
+  void _fillCode(String value, int startIndex) {
+    final chars = value.replaceAll(RegExp(r'\s'), '').split('');
+    final availableSlots = _codeLength - startIndex;
+    final charsToApply = chars.take(availableSlots).toList();
+
+    for (var i = 0; i < charsToApply.length; i++) {
+      final controller = _controllers[startIndex + i];
+      controller.text = charsToApply[i];
+      controller.selection = TextSelection.collapsed(
+        offset: controller.text.length,
+      );
+    }
+
+    final nextIndex = (startIndex + charsToApply.length).clamp(
+      0,
+      _codeLength - 1,
+    );
+    _focusNodes[nextIndex].requestFocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<AuthViewModel>();
@@ -45,7 +92,7 @@ class _VerificationCodeViewState extends State<VerificationCodeView> {
             children: [
               ProgressionBar(
                 currentStep: 4,
-                totalSteps: 4,
+                totalSteps: 5,
                 stepLabel: 'Passo 4: Verificação',
                 onBack: () => context.pop(),
               ),
@@ -62,29 +109,26 @@ class _VerificationCodeViewState extends State<VerificationCodeView> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Verifique na sua caixa de E-mails e preencha o código a seguir',
+                        'Verifique na sua caixa de e-mails e preencha o código a seguir',
                         style: Theme.of(context).textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 40),
-
-                      // 6-digit code input
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(6, (i) {
+                        children: List.generate(_codeLength, (i) {
                           return Container(
-                            width: 45,
+                            width: 36,
                             height: 55,
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
                             child: TextField(
                               controller: _controllers[i],
                               focusNode: _focusNodes[i],
                               textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(1),
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
+                              keyboardType: TextInputType.text,
+                              textCapitalization: TextCapitalization.characters,
+                              autocorrect: false,
+                              enableSuggestions: false,
                               style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w600,
@@ -94,7 +138,9 @@ class _VerificationCodeViewState extends State<VerificationCodeView> {
                                 contentPadding: EdgeInsets.zero,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(color: AppColors.outline),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.outline,
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -104,55 +150,52 @@ class _VerificationCodeViewState extends State<VerificationCodeView> {
                                   ),
                                 ),
                               ),
-                              onChanged: (value) {
-                                if (value.isNotEmpty && i < 5) {
-                                  _focusNodes[i + 1].requestFocus();
-                                }
-                                if (value.isEmpty && i > 0) {
-                                  _focusNodes[i - 1].requestFocus();
-                                }
-                              },
+                              onChanged:
+                                  (value) => _handleCodeChanged(value, i),
                             ),
                           );
                         }),
                       ),
                       const SizedBox(height: 16),
-
                       if (vm.error != null)
                         Text(
                           vm.error!,
-                          style: const TextStyle(color: AppColors.error, fontSize: 13),
+                          style: const TextStyle(
+                            color: AppColors.error,
+                            fontSize: 13,
+                          ),
                         ),
-
-                      const Spacer(),
-                      PrimaryButton(
-                        label: 'Verificar',
-                        isLoading: vm.isLoading,
-                        onPressed: () async {
-                          final success = await vm.verifyCode(_code);
-                          if (success && context.mounted) {
-                            context.push('/onboarding/completion');
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
-                          // Mock: reenviar código
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Código reenviado!'),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'Reenviar código',
-                          style: TextStyle(color: AppColors.primary),
-                        ),
-                      ),
-                      const SizedBox(height: 40),
                     ],
                   ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+                child: Column(
+                  children: [
+                    PrimaryButton(
+                      label: 'Verificar',
+                      isLoading: vm.isLoading,
+                      onPressed: () async {
+                        final success = await vm.verifyCode(_code);
+                        if (success && context.mounted) {
+                          context.push('/onboarding/completion');
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Código reenviado!')),
+                        );
+                      },
+                      child: const Text(
+                        'Reenviar código',
+                        style: TextStyle(color: AppColors.primary),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
