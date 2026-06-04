@@ -5,6 +5,15 @@ import 'package:frentis_cao/models/content_models.dart';
 class SupabaseDataService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  User _requireAuthenticatedUser() {
+    final user =
+        _supabase.auth.currentSession?.user ?? _supabase.auth.currentUser;
+    if (user == null) {
+      throw StateError('Usuário autenticado obrigatório para criar campanha.');
+    }
+    return user;
+  }
+
   /// Busca os posts para o feed da Home
   /// Faz um join com a tabela de profiles para obter os dados da ONG.
   Future<List<PostModel>> fetchPosts() async {
@@ -51,6 +60,83 @@ class SupabaseDataService {
     } catch (e) {
       debugPrint('Erro ao buscar campanhas: $e');
       return [];
+    }
+  }
+
+  Future<bool> isCurrentUserOng() async {
+    try {
+      final user =
+          _supabase.auth.currentSession?.user ?? _supabase.auth.currentUser;
+      if (user == null) return false;
+
+      final response =
+          await _supabase
+              .from('profiles')
+              .select('user_type')
+              .eq('id', user.id)
+              .maybeSingle();
+
+      return response?['user_type'] == 'ong';
+    } catch (e) {
+      debugPrint('Erro ao verificar perfil ONG: $e');
+      return false;
+    }
+  }
+
+  Future<String> uploadCampaignImage({
+    required Uint8List bytes,
+    required String fileName,
+    required int index,
+  }) async {
+    final user = _requireAuthenticatedUser();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final extension = fileName.split('.').last.toLowerCase();
+    final safeExtension = extension == fileName ? 'png' : extension;
+    final path =
+        'private/campaign_img/${user.id}/${timestamp}_$index.$safeExtension';
+
+    await _supabase.storage
+        .from('frentiscao_images')
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
+
+    return _supabase.storage.from('frentiscao_images').getPublicUrl(path);
+  }
+
+  Future<bool> createCampaign({
+    required String title,
+    required String description,
+    required String location,
+    required String date,
+    required String type,
+    required String instructions,
+    required bool donationEnabled,
+    List<String> imageUrls = const [],
+  }) async {
+    try {
+      final user = _requireAuthenticatedUser();
+
+      await _supabase.from('campaigns').insert({
+        'title': title,
+        'description': description,
+        'location': location,
+        'date': date.isEmpty ? null : date,
+        'image_url': imageUrls.isEmpty ? null : imageUrls,
+        'type': type,
+        'instructions': CampaignModel.encodeInstructionsMetadata(
+          instructions,
+          donationEnabled,
+        ),
+        'creator_id': user.id,
+      });
+
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao criar campanha: $e');
+      return false;
     }
   }
 }

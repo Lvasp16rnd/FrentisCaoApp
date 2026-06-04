@@ -39,7 +39,7 @@ class OngPostCard extends StatelessWidget {
                     radius: 12,
                     backgroundColor: AppColors.primaryLight,
                     child: Text(
-                      post.orgName[0],
+                      _avatarInitial(post.orgName),
                       style: const TextStyle(fontSize: 11, color: AppColors.white),
                     ),
                   ),
@@ -105,4 +105,10 @@ class OngPostCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _avatarInitial(String value) {
+  final text = value.trim();
+  if (text.isEmpty) return '?';
+  return text[0].toUpperCase();
 }
