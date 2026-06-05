@@ -4,6 +4,7 @@ import 'package:frentis_cao/models/content_models.dart';
 import 'package:frentis_cao/views/auth/login_view.dart';
 import 'package:frentis_cao/views/auth/register_view.dart';
 import 'package:frentis_cao/views/campaigns/new_campaign_view.dart';
+import 'package:frentis_cao/views/posts/new_post_view.dart';
 import 'package:frentis_cao/views/onboarding/welcome_screen.dart';
 import 'package:frentis_cao/views/onboarding/user_type_view.dart';
 import 'package:frentis_cao/views/onboarding/terms_view.dart';
@@ -83,6 +84,17 @@ class AppRouter {
         name: 'postDetail',
         builder:
             (context, state) => PostDetailView(post: state.extra! as PostModel),
+      ),
+      GoRoute(
+        path: '/post-new',
+        name: 'postNew',
+        builder: (context, state) => const NewPostView(),
+      ),
+      GoRoute(
+        path: '/post-edit',
+        name: 'postEdit',
+        builder:
+            (context, state) => NewPostView(post: state.extra! as PostModel),
       ),
       GoRoute(
         path: '/animal-detail',
