@@ -65,8 +65,8 @@ class _LoginViewState extends State<LoginView> {
                 const SizedBox(height: 80),
                 Image.asset(
                   'assets/pics/Login/adopt-a-pet/bro.png',
-                  height: 200,
-                  width: 250,
+                  height: 350,
+                  width: 400,
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 40),

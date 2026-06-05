@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/models/content_models.dart';
+import 'package:frentis_cao/views/checkout/checkout_mock_view.dart';
 
 /// Tela de detalhes de um post do feed.
 /// Layout: AppBar verde → header ONG → imagem grande → conteúdo → botões Doar/Compartilhar
@@ -125,7 +126,13 @@ class PostDetailView extends StatelessWidget {
                     width: double.infinity,
                     height: 58,
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => CheckoutMockView(receiverName: post.orgName),
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.volunteer_activism, size: 20),
                       label: const Text('Doar'),
                       style: ElevatedButton.styleFrom(
@@ -285,18 +292,18 @@ class AnimalDetailView extends StatelessWidget {
                             (context, index) => const SizedBox(width: 8),
                         itemBuilder:
                             (_, i) => Container(
-                              width: 120,
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryLight.withValues(
-                                  alpha: 0.2,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.photo_outlined,
-                                color: AppColors.primary,
-                              ),
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.2,
                             ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.photo_outlined,
+                            color: AppColors.primary,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -312,7 +319,21 @@ class AnimalDetailView extends StatelessWidget {
                 width: double.infinity,
                 height: 58,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Interesse Registrado!'),
+                        content: Text('A ONG responsável pelo ${animal.name} entrará em contato com você em breve pelo WhatsApp.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.phone, size: 20),
                   label: const Text('Tenho interesse'),
                   style: ElevatedButton.styleFrom(
@@ -370,9 +391,9 @@ class AnimalDetailView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color:
-            active
-                ? AppColors.primary.withValues(alpha: 0.12)
-                : AppColors.progressBg,
+        active
+            ? AppColors.primary.withValues(alpha: 0.12)
+            : AppColors.progressBg,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -661,10 +682,10 @@ class _CampaignImage extends StatelessWidget {
       fit: BoxFit.cover,
       errorBuilder:
           (_, _, _) => Icon(
-            Icons.image_outlined,
-            size: iconSize,
-            color: AppColors.primary,
-          ),
+        Icons.image_outlined,
+        size: iconSize,
+        color: AppColors.primary,
+      ),
     );
   }
 }
@@ -717,13 +738,13 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
                   fit: BoxFit.cover,
                   errorBuilder:
                       (context, error, stackTrace) => Container(
-                        color: AppColors.primaryLight.withValues(alpha: 0.25),
-                        child: const Icon(
-                          Icons.image_outlined,
-                          size: 48,
-                          color: AppColors.primary,
-                        ),
-                      ),
+                    color: AppColors.primaryLight.withValues(alpha: 0.25),
+                    child: const Icon(
+                      Icons.image_outlined,
+                      size: 48,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 );
               },
             ),
@@ -742,7 +763,7 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
                 margin: const EdgeInsets.symmetric(horizontal: 3),
                 decoration: BoxDecoration(
                   color:
-                      selected ? AppColors.primary : AppColors.outlineVariant,
+                  selected ? AppColors.primary : AppColors.outlineVariant,
                   borderRadius: BorderRadius.circular(10),
                 ),
               );
