@@ -232,51 +232,11 @@ class SupabaseDataService {
           donationEnabled,
         ),
         'creator_id': user.id,
->>>>>>> origin/develop
       });
 
       return true;
     } catch (e) {
-<<<<<<< HEAD
-      debugPrint('Erro ao inserir animal: $e');
-      return false;
-    }
-  }
-
-  /// Busca as adoções feitas pelo usuário logado (com os dados do animal)
-  Future<List<AdoptionModel>> fetchMyAdoptions() async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) return [];
-
-      final response = await _supabase
-          .from('adoptions')
-          .select('*, animals(*)')
-          .eq('adopter_id', user.id)
-          .order('created_at', ascending: false);
-
-      final List<dynamic> data = response;
-      return data.map((json) => AdoptionModel.fromJson(json)).toList();
-    } catch (e) {
-      debugPrint('Erro ao buscar adoções: $e');
-      return [];
-    }
-  }
-
-  /// Registra o interesse de adoção de um animal
-  Future<bool> applyForAdoption(String animalId) async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) throw Exception('Usuário não autenticado');
-
-      await _supabase.from('adoptions').insert({
-        'animal_id': animalId,
-        'adopter_id': user.id,
-        'status': 'Em Análise',
-      });
-      return true;
-    } catch (e) {
-      debugPrint('Erro ao registrar adoção: $e');
+      debugPrint('Erro ao criar campanha: $e');
       return false;
     }
   }
