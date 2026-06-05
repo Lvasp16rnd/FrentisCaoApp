@@ -27,6 +27,7 @@ class _HomeTabState extends State<HomeTab> {
   String _submittedSearchText = '';
   _HomeFilter _selectedFilter = _HomeFilter.ongs;
   bool _showOngSuggestions = false;
+  bool _canCreatePost = false;
   Timer? _ongSuggestionsDebounce;
 
   @override
@@ -37,6 +38,7 @@ class _HomeTabState extends State<HomeTab> {
       if (vm.posts.isEmpty && !vm.isLoadingPosts) {
         vm.fetchPosts();
       }
+      _loadPermissions(vm);
     });
     _ongSuggestionsScrollCtrl.addListener(_onOngSuggestionsScroll);
   }
@@ -50,10 +52,25 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _openNewPost() async {
+    if (!_canCreatePost) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Seu perfil nao tem permissao para criar posts.'),
+        ),
+      );
+      return;
+    }
+
     final created = await context.push<bool>('/post-new');
     if (created == true && mounted) {
       context.read<DataViewModel>().fetchPosts();
     }
+  }
+
+  Future<void> _loadPermissions(DataViewModel vm) async {
+    final canCreate = await vm.canCurrentUserCreatePosts();
+    if (!mounted) return;
+    setState(() => _canCreatePost = canCreate);
   }
 
   Future<void> _refreshFeed() async {
@@ -401,15 +418,16 @@ class _HomeTabState extends State<HomeTab> {
                 ],
               ),
             ),
-            Positioned(
-              right: 20,
-              bottom: 20,
-              child: FloatingActionButton(
-                onPressed: _openNewPost,
-                tooltip: 'Novo post',
-                child: const Icon(Icons.add),
+            if (_canCreatePost)
+              Positioned(
+                right: 20,
+                bottom: 20,
+                child: FloatingActionButton(
+                  onPressed: _openNewPost,
+                  tooltip: 'Novo post',
+                  child: const Icon(Icons.add),
+                ),
               ),
-            ),
             if (_showOngSuggestions)
               Positioned(
                 left: 20,

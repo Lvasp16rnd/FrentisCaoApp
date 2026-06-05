@@ -12,9 +12,8 @@ class DataViewModel extends ChangeNotifier {
   List<AnimalModel> _animals = [];
   List<CampaignModel> _campaigns = [];
   List<UserModel> _ongSuggestions = [];
-  final Set<String> _likedPostIds = {};
   final Set<String> _savedPostIds = {};
-  final Map<String, int> _postLikeCounts = {};
+  final Set<String> _likingPostIds = {};
 
   bool _isLoadingPosts = false;
   bool _isLoadingAnimals = false;
@@ -45,11 +44,13 @@ class DataViewModel extends ChangeNotifier {
   bool get isCreatingPost => _isCreatingPost;
   bool get isCreatingCampaign => _isCreatingCampaign;
 
-  bool isPostLiked(PostModel post) => _likedPostIds.contains(post.id);
+  bool isPostLiked(PostModel post) {
+    return post.isLikedBy(_dataService.currentUserId);
+  }
 
   bool isPostSaved(PostModel post) => _savedPostIds.contains(post.id);
 
-  int likeCountForPost(PostModel post) => _postLikeCounts[post.id] ?? 0;
+  int likeCountForPost(PostModel post) => post.likeCount;
 
   Future<void> fetchPosts() async {
     _isLoadingPosts = true;
@@ -85,16 +86,33 @@ class DataViewModel extends ChangeNotifier {
     return _dataService.isCurrentUserOng();
   }
 
-  void togglePostLike(PostModel post) {
-    final isLiked = _likedPostIds.contains(post.id);
-    final currentCount = _postLikeCounts[post.id] ?? 0;
+  Future<bool> canCurrentUserCreatePosts() {
+    return _dataService.canCurrentUserCreatePosts();
+  }
 
-    if (isLiked) {
-      _likedPostIds.remove(post.id);
-      _postLikeCounts[post.id] = currentCount > 0 ? currentCount - 1 : 0;
-    } else {
-      _likedPostIds.add(post.id);
-      _postLikeCounts[post.id] = currentCount + 1;
+  Future<void> togglePostLike(PostModel post) async {
+    final currentUserId = _dataService.currentUserId;
+    if (currentUserId == null || currentUserId.isEmpty) return;
+
+    if (!_likingPostIds.add(post.id)) return;
+
+    notifyListeners();
+    final updatedLikeState = await _dataService.likePost(post.id);
+    _likingPostIds.remove(post.id);
+
+    if (updatedLikeState != null) {
+      _posts =
+          _posts
+              .map(
+                (item) =>
+                    item.id == post.id
+                        ? item.copyWith(
+                          likes: updatedLikeState.likes,
+                          likeCount: updatedLikeState.likeCount,
+                        )
+                        : item,
+              )
+              .toList();
     }
 
     notifyListeners();
@@ -182,6 +200,9 @@ class DataViewModel extends ChangeNotifier {
     List<Uint8List> imageBytes = const [],
     List<String> imageFileNames = const [],
   }) async {
+    final canCreate = await _dataService.canCurrentUserCreatePosts();
+    if (!canCreate) return false;
+
     _isCreatingPost = true;
     notifyListeners();
 

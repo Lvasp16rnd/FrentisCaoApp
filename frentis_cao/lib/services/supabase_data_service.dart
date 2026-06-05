@@ -6,6 +6,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frentis_cao/models/content_models.dart';
 import 'package:frentis_cao/models/user_model.dart';
 
+class PostLikeState {
+  final List<String> likes;
+  final int likeCount;
+
+  const PostLikeState({required this.likes, required this.likeCount});
+}
+
 class SupabaseDataService {
   static const String _postsTable = 'posts';
 
@@ -92,6 +99,42 @@ class SupabaseDataService {
     return [text];
   }
 
+  List<String> _stringValues(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return value
+          .map((item) => item.toString().trim())
+          .where((item) => item.isNotEmpty)
+          .toSet()
+          .toList();
+    }
+
+    final text = value.toString().trim();
+    if (text.isEmpty) return [];
+    if (!text.startsWith('[')) return [text];
+
+    try {
+      final decoded = jsonDecode(text);
+      if (decoded is List) {
+        return decoded
+            .map((item) => item.toString().trim())
+            .where((item) => item.isNotEmpty)
+            .toSet()
+            .toList();
+      }
+    } catch (_) {
+      return [text];
+    }
+
+    return [text];
+  }
+
+  int _intValue(dynamic value, {int fallback = 0}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? fallback;
+  }
+
   /// Busca os animais para adoção
   Future<List<AnimalModel>> fetchAnimals() async {
     try {
@@ -140,7 +183,9 @@ class SupabaseDataService {
       // 1. Validar Autenticação (Exigência do RLS)
       final user = _supabase.auth.currentUser;
       if (user == null) {
-        throw Exception('Usuário não autenticado. O RLS bloqueou a requisição.');
+        throw Exception(
+          'Usuário não autenticado. O RLS bloqueou a requisição.',
+        );
       }
 
       // 2. Upload das imagens
@@ -149,17 +194,25 @@ class SupabaseDataService {
         final imageFile = imageFiles[i];
         final fileExt = imageFile.path.split('.').last.toLowerCase();
         final safeExtension = fileExt == imageFile.path ? 'png' : fileExt;
-        final fileName = '${DateTime.now().millisecondsSinceEpoch}_$i.$safeExtension';
-        
+        final fileName =
+            '${DateTime.now().millisecondsSinceEpoch}_$i.$safeExtension';
+
         final filePath = 'private/animalimg/${user.id}/$fileName';
-        
-        await _supabase.storage.from('frentiscao_images').upload(
+
+        await _supabase.storage
+            .from('frentiscao_images')
+            .upload(
               filePath,
               imageFile,
-              fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+              fileOptions: const FileOptions(
+                cacheControl: '3600',
+                upsert: true,
+              ),
             );
 
-        final imageUrl = _supabase.storage.from('frentiscao_images').getPublicUrl(filePath);
+        final imageUrl = _supabase.storage
+            .from('frentiscao_images')
+            .getPublicUrl(filePath);
         uploadedUrls.add(imageUrl);
       }
 
@@ -225,10 +278,15 @@ class SupabaseDataService {
   }
 
   Future<bool> isCurrentUserOng() async {
+    final userType = await currentUserType();
+    return userType == 'ong';
+  }
+
+  Future<String?> currentUserType() async {
     try {
       final user =
           _supabase.auth.currentSession?.user ?? _supabase.auth.currentUser;
-      if (user == null) return false;
+      if (user == null) return null;
 
       final response =
           await _supabase
@@ -237,11 +295,27 @@ class SupabaseDataService {
               .eq('id', user.id)
               .maybeSingle();
 
-      return response?['user_type'] == 'ong';
+      return response?['user_type'] as String?;
     } catch (e) {
-      debugPrint('Erro ao verificar perfil ONG: $e');
+      debugPrint('Erro ao buscar tipo do perfil: $e');
+      return null;
+    }
+  }
+
+  Future<bool> canCurrentUserCreatePosts() async {
+    final userType = await currentUserType();
+    if (userType == null) return false;
+
+    return userType != 'donor' && userType != 'usuario' && userType != 'user';
+  }
+
+  Future<bool> _ensureCurrentUserCanCreatePosts() async {
+    final canCreate = await canCurrentUserCreatePosts();
+    if (!canCreate) {
+      debugPrint('Usuario atual nao tem permissao para criar posts.');
       return false;
     }
+    return true;
   }
 
   Future<List<UserModel>> searchOngs({
@@ -326,6 +400,8 @@ class SupabaseDataService {
   }) async {
     try {
       final user = _requireAuthenticatedUser();
+      final canCreate = await _ensureCurrentUserCanCreatePosts();
+      if (!canCreate) return false;
 
       await _supabase.from(_postsTable).insert({
         'title': title,
@@ -335,12 +411,35 @@ class SupabaseDataService {
         'tag': tag.isEmpty ? null : tag,
         'org_id': user.id,
         'ativo': true,
+        'likes_id': <String>[],
+        'like_count': 0,
       });
 
       return true;
     } catch (e) {
       debugPrint('Erro ao criar post: $e');
       return false;
+    }
+  }
+
+  Future<PostLikeState?> likePost(String postId) async {
+    try {
+      _requireAuthenticatedUser();
+      final response = await _supabase.rpc(
+        'like_post',
+        params: {'p_post_id': postId},
+      );
+
+      if (response is! Map) return null;
+
+      final likes = _stringValues(response['likes_id']);
+      return PostLikeState(
+        likes: likes,
+        likeCount: _intValue(response['like_count'], fallback: likes.length),
+      );
+    } catch (e) {
+      debugPrint('Erro ao curtir post: $e');
+      return null;
     }
   }
 

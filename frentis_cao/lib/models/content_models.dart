@@ -12,6 +12,8 @@ class PostModel {
   final String tag;
   final String fullDescription;
   final bool ativo;
+  final List<String> likes;
+  final int likeCount;
 
   const PostModel({
     required this.id,
@@ -25,12 +27,20 @@ class PostModel {
     this.tag = 'Doar',
     this.fullDescription = '',
     this.ativo = true,
+    this.likes = const [],
+    this.likeCount = 0,
   });
+
+  bool isLikedBy(String? userId) {
+    if (userId == null || userId.isEmpty) return false;
+    return likes.contains(userId);
+  }
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
     // Para relacionamentos, o Supabase pode retornar um mapa em 'profiles' dependendo da query
     final orgData = json['profiles'] as Map<String, dynamic>?;
     final imageUrls = _parseStringList(json['image_url']);
+    final likes = _parseStringList(json['likes_id']);
 
     return PostModel(
       id: json['id'] as String? ?? '',
@@ -44,6 +54,40 @@ class PostModel {
       tag: json['tag'] as String? ?? 'Doar',
       fullDescription: json['full_description'] as String? ?? '',
       ativo: json['ativo'] as bool? ?? false,
+      likes: likes,
+      likeCount: _parseInt(json['like_count'], fallback: likes.length),
+    );
+  }
+
+  PostModel copyWith({
+    String? id,
+    String? orgId,
+    String? orgName,
+    String? orgAvatarUrl,
+    String? imageUrl,
+    List<String>? imageUrls,
+    String? title,
+    String? description,
+    String? tag,
+    String? fullDescription,
+    bool? ativo,
+    List<String>? likes,
+    int? likeCount,
+  }) {
+    return PostModel(
+      id: id ?? this.id,
+      orgId: orgId ?? this.orgId,
+      orgName: orgName ?? this.orgName,
+      orgAvatarUrl: orgAvatarUrl ?? this.orgAvatarUrl,
+      imageUrl: imageUrl ?? this.imageUrl,
+      imageUrls: imageUrls ?? this.imageUrls,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      tag: tag ?? this.tag,
+      fullDescription: fullDescription ?? this.fullDescription,
+      ativo: ativo ?? this.ativo,
+      likes: likes ?? this.likes,
+      likeCount: likeCount ?? this.likeCount,
     );
   }
 
@@ -80,6 +124,12 @@ class PostModel {
     return [text];
   }
 
+  static int _parseInt(dynamic value, {int fallback = 0}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? fallback;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -90,6 +140,8 @@ class PostModel {
       'tag': tag,
       'full_description': fullDescription,
       'ativo': ativo,
+      'likes_id': likes,
+      'like_count': likeCount,
       // org_id deveria ser mapeado na hora de inserir no banco, não incluímos orgName aqui
     };
   }
@@ -276,7 +328,10 @@ class AdoptionModel {
       id: json['id'] as String? ?? '',
       animalId: json['animal_id'] as String? ?? '',
       status: json['status'] as String? ?? 'Em Análise',
-      animal: json['animals'] != null ? AnimalModel.fromJson(json['animals']) : null,
+      animal:
+          json['animals'] != null
+              ? AnimalModel.fromJson(json['animals'])
+              : null,
     );
   }
 }
