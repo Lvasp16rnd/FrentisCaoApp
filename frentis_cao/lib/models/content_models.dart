@@ -29,7 +29,7 @@ class PostModel {
       id: json['id'] as String? ?? '',
       orgName: _nonEmptyString(orgData?['name'], 'ONG'),
       orgAvatarUrl: orgData?['avatar_url'] as String? ?? '',
-      imageUrl: json['image_url'] as String? ?? '',
+      imageUrl: _firstString(json['image_url']),
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       tag: json['tag'] as String? ?? 'Doar',
@@ -40,6 +40,27 @@ class PostModel {
   static String _nonEmptyString(dynamic value, String fallback) {
     final text = value?.toString().trim() ?? '';
     return text.isEmpty ? fallback : text;
+  }
+
+  static String _firstString(dynamic value) {
+    if (value == null) return '';
+    if (value is List) {
+      return value.isEmpty ? '' : value.first.toString().trim();
+    }
+
+    final text = value.toString().trim();
+    if (!text.startsWith('[')) return text;
+
+    try {
+      final decoded = jsonDecode(text);
+      if (decoded is List && decoded.isNotEmpty) {
+        return decoded.first.toString().trim();
+      }
+    } catch (_) {
+      return text;
+    }
+
+    return text;
   }
 
   Map<String, dynamic> toJson() {

@@ -50,7 +50,7 @@ class PostDetailView extends StatelessWidget {
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ),
-                          const Icon(Icons.more_horiz, size: 18),
+                          const Icon(Icons.more_vert, size: 18),
                         ],
                       ),
                     ),
@@ -60,11 +60,7 @@ class PostDetailView extends StatelessWidget {
                       height: 308,
                       width: double.infinity,
                       color: AppColors.primaryLight.withValues(alpha: 0.3),
-                      child: const Icon(
-                        Icons.image_outlined,
-                        size: 60,
-                        color: AppColors.primary,
-                      ),
+                      child: _PostImage(imageUrl: post.imageUrl, iconSize: 60),
                     ),
 
                     // Content
@@ -74,7 +70,7 @@ class PostDetailView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Doação necessária',
+                            post.title,
                             style: Theme.of(
                               context,
                             ).textTheme.titleMedium?.copyWith(
@@ -89,24 +85,6 @@ class PostDetailView extends StatelessWidget {
                                 ? post.fullDescription
                                 : post.description,
                             style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const SizedBox(height: 10),
-                          // Tag chip
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.outlineVariant,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              post.tag,
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
                           ),
                         ],
                       ),
@@ -129,7 +107,10 @@ class PostDetailView extends StatelessWidget {
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => CheckoutMockView(receiverName: post.orgName),
+                            builder:
+                                (_) => CheckoutMockView(
+                                  receiverName: post.orgName,
+                                ),
                           ),
                         );
                       },
@@ -292,18 +273,18 @@ class AnimalDetailView extends StatelessWidget {
                             (context, index) => const SizedBox(width: 8),
                         itemBuilder:
                             (_, i) => Container(
-                          width: 120,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withValues(
-                              alpha: 0.2,
+                              width: 120,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryLight.withValues(
+                                  alpha: 0.2,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.photo_outlined,
+                                color: AppColors.primary,
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.photo_outlined,
-                            color: AppColors.primary,
-                          ),
-                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -322,16 +303,19 @@ class AnimalDetailView extends StatelessWidget {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Interesse Registrado!'),
-                        content: Text('A ONG responsável pelo ${animal.name} entrará em contato com você em breve pelo WhatsApp.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(),
-                            child: const Text('OK'),
+                      builder:
+                          (ctx) => AlertDialog(
+                            title: const Text('Interesse Registrado!'),
+                            content: Text(
+                              'A ONG responsável pelo ${animal.name} entrará em contato com você em breve pelo WhatsApp.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text('OK'),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
                     );
                   },
                   icon: const Icon(Icons.phone, size: 20),
@@ -391,9 +375,9 @@ class AnimalDetailView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color:
-        active
-            ? AppColors.primary.withValues(alpha: 0.12)
-            : AppColors.progressBg,
+            active
+                ? AppColors.primary.withValues(alpha: 0.12)
+                : AppColors.progressBg,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -659,6 +643,38 @@ String _campaignShareText(CampaignModel campaign) {
   ].join('\n');
 }
 
+class _PostImage extends StatelessWidget {
+  final String imageUrl;
+  final double iconSize;
+
+  const _PostImage({required this.imageUrl, required this.iconSize});
+
+  @override
+  Widget build(BuildContext context) {
+    final url = Uri.encodeFull(imageUrl.trim());
+    if (url.isEmpty) {
+      return Icon(
+        Icons.image_outlined,
+        size: iconSize,
+        color: AppColors.primary,
+      );
+    }
+
+    return Image.network(
+      url,
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder:
+          (context, error, stackTrace) => Icon(
+            Icons.image_outlined,
+            size: iconSize,
+            color: AppColors.primary,
+          ),
+    );
+  }
+}
+
 class _CampaignImage extends StatelessWidget {
   final String imageUrl;
   final double iconSize;
@@ -682,10 +698,10 @@ class _CampaignImage extends StatelessWidget {
       fit: BoxFit.cover,
       errorBuilder:
           (_, _, _) => Icon(
-        Icons.image_outlined,
-        size: iconSize,
-        color: AppColors.primary,
-      ),
+            Icons.image_outlined,
+            size: iconSize,
+            color: AppColors.primary,
+          ),
     );
   }
 }
@@ -738,13 +754,13 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
                   fit: BoxFit.cover,
                   errorBuilder:
                       (context, error, stackTrace) => Container(
-                    color: AppColors.primaryLight.withValues(alpha: 0.25),
-                    child: const Icon(
-                      Icons.image_outlined,
-                      size: 48,
-                      color: AppColors.primary,
-                    ),
-                  ),
+                        color: AppColors.primaryLight.withValues(alpha: 0.25),
+                        child: const Icon(
+                          Icons.image_outlined,
+                          size: 48,
+                          color: AppColors.primary,
+                        ),
+                      ),
                 );
               },
             ),
@@ -763,7 +779,7 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
                 margin: const EdgeInsets.symmetric(horizontal: 3),
                 decoration: BoxDecoration(
                   color:
-                  selected ? AppColors.primary : AppColors.outlineVariant,
+                      selected ? AppColors.primary : AppColors.outlineVariant,
                   borderRadius: BorderRadius.circular(10),
                 ),
               );

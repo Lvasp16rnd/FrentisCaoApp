@@ -14,6 +14,7 @@ class DataViewModel extends ChangeNotifier {
   bool _isLoadingPosts = false;
   bool _isLoadingAnimals = false;
   bool _isLoadingCampaigns = false;
+  bool _isCreatingPost = false;
   bool _isCreatingCampaign = false;
 
   // Getters
@@ -24,6 +25,7 @@ class DataViewModel extends ChangeNotifier {
   bool get isLoadingPosts => _isLoadingPosts;
   bool get isLoadingAnimals => _isLoadingAnimals;
   bool get isLoadingCampaigns => _isLoadingCampaigns;
+  bool get isCreatingPost => _isCreatingPost;
   bool get isCreatingCampaign => _isCreatingCampaign;
 
   Future<void> fetchPosts() async {
@@ -58,6 +60,46 @@ class DataViewModel extends ChangeNotifier {
 
   Future<bool> isCurrentUserOng() {
     return _dataService.isCurrentUserOng();
+  }
+
+  Future<bool> createPost({
+    required String title,
+    String description = '',
+    String fullDescription = '',
+    String tag = '',
+    Uint8List? imageBytes,
+    String? imageFileName,
+  }) async {
+    _isCreatingPost = true;
+    notifyListeners();
+
+    try {
+      var imageUrl = '';
+      if (imageBytes != null) {
+        imageUrl = await _dataService.uploadPostImage(
+          bytes: imageBytes,
+          fileName: imageFileName ?? 'post.png',
+        );
+      }
+
+      final created = await _dataService.createPost(
+        title: title,
+        description: description,
+        fullDescription: fullDescription,
+        imageUrl: imageUrl,
+        tag: tag,
+      );
+
+      if (!created) return false;
+      _posts = await _dataService.fetchPosts();
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao criar post no viewmodel: $e');
+      return false;
+    } finally {
+      _isCreatingPost = false;
+      notifyListeners();
+    }
   }
 
   Future<bool> createCampaign({

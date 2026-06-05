@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frentis_cao/models/content_models.dart';
@@ -24,11 +26,49 @@ class SupabaseDataService {
           .order('created_at', ascending: false);
 
       final List<dynamic> data = response;
-      return data.map((json) => PostModel.fromJson(json)).toList();
+      return data.map((json) {
+        final postJson = Map<String, dynamic>.from(json as Map);
+        postJson['image_url'] = _storagePublicUrl(postJson['image_url']);
+        return PostModel.fromJson(postJson);
+      }).toList();
     } catch (e) {
       debugPrint('Erro ao buscar posts: $e');
       return [];
     }
+  }
+
+  String _storagePublicUrl(dynamic value) {
+    final raw = _firstImageValue(value);
+    if (raw.isEmpty ||
+        raw.startsWith('http://') ||
+        raw.startsWith('https://')) {
+      return raw;
+    }
+
+    return _supabase.storage
+        .from('frentiscao_images')
+        .getPublicUrl(raw.replaceFirst(RegExp(r'^/+'), ''));
+  }
+
+  String _firstImageValue(dynamic value) {
+    if (value == null) return '';
+    if (value is List) {
+      return value.isEmpty ? '' : value.first.toString().trim();
+    }
+
+    final text = value.toString().trim();
+    if (!text.startsWith('[')) return text;
+
+    try {
+      final decoded = jsonDecode(text);
+      if (decoded is List && decoded.isNotEmpty) {
+        return decoded.first.toString().trim();
+      }
+    } catch (_) {
+      return text;
+    }
+
+    return text;
   }
 
   /// Busca os animais para adoção
@@ -104,6 +144,53 @@ class SupabaseDataService {
         );
 
     return _supabase.storage.from('frentiscao_images').getPublicUrl(path);
+  }
+
+  Future<String> uploadPostImage({
+    required Uint8List bytes,
+    required String fileName,
+  }) async {
+    final user = _requireAuthenticatedUser();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final extension = fileName.split('.').last.toLowerCase();
+    final safeExtension = extension == fileName ? 'png' : extension;
+    final path = 'private/post_img/${user.id}/$timestamp.$safeExtension';
+
+    await _supabase.storage
+        .from('frentiscao_images')
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
+
+    return _supabase.storage.from('frentiscao_images').getPublicUrl(path);
+  }
+
+  Future<bool> createPost({
+    required String title,
+    String description = '',
+    String fullDescription = '',
+    String imageUrl = '',
+    String tag = '',
+  }) async {
+    try {
+      final user = _requireAuthenticatedUser();
+
+      await _supabase.from('posts').insert({
+        'title': title,
+        'description': description.isEmpty ? null : description,
+        'full_description': fullDescription.isEmpty ? null : fullDescription,
+        'image_url': imageUrl.isEmpty ? null : imageUrl,
+        'tag': tag.isEmpty ? null : tag,
+        'org_id': user.id,
+      });
+
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao criar post: $e');
+      return false;
+    }
   }
 
   Future<bool> createCampaign({

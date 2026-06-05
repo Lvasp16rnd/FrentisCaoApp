@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/viewmodels/data_view_model.dart';
+import 'package:frentis_cao/views/widgets/app_background.dart';
 import 'package:frentis_cao/views/widgets/ong_post_card.dart';
 import 'package:frentis_cao/views/widgets/skeleton_cards.dart';
 
@@ -25,119 +26,152 @@ class _HomeTabState extends State<HomeTab> {
     });
   }
 
+  Future<void> _openNewPost() async {
+    final created = await context.push<bool>('/post-new');
+    if (created == true && mounted) {
+      context.read<DataViewModel>().fetchPosts();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<DataViewModel>();
 
     return SafeArea(
-      child: CustomScrollView(
-        slivers: [
-          // Header: Search bar
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 39,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.outlineVariant),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: const Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Pesquisar ONGs e posts...',
-                              style: TextStyle(
-                                fontSize: 16,
+      child: AppBackground(
+        opacity: 0.42,
+        child: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                // Header: Search bar
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 39,
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              border: Border.all(
                                 color: AppColors.outlineVariant,
-                                letterSpacing: 0.5,
                               ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: const Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Search',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: AppColors.outlineVariant,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.search,
+                                  color: AppColors.outlineVariant,
+                                ),
+                              ],
                             ),
                           ),
-                          Icon(Icons.search, color: AppColors.outlineVariant),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          width: 39,
+                          height: 39,
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.outlineVariant),
+                          ),
+                          child: const Icon(
+                            Icons.person,
+                            color: AppColors.primary,
+                            size: 22,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 39,
-                    height: 39,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Icon(
-                      Icons.tune,
-                      color: AppColors.white,
-                      size: 20,
+                ),
+
+                // Category chips
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      children: const [
+                        _CategoryChip(label: "ONG's"),
+                        SizedBox(width: 8),
+                        _CategoryChip(label: 'Pets'),
+                        SizedBox(width: 8),
+                        _CategoryChip(label: 'Caes'),
+                        SizedBox(width: 8),
+                        _CategoryChip(label: 'Gatos'),
+                        SizedBox(width: 8),
+                        _CategoryChip(label: 'Recentes'),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
 
-          // Category chips
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                children: const [
-                  _CategoryChip(label: 'Todos', selected: true),
-                  SizedBox(width: 8),
-                  _CategoryChip(label: 'ONGs'),
-                  SizedBox(width: 8),
-                  _CategoryChip(label: 'Protetores'),
-                  SizedBox(width: 8),
-                  _CategoryChip(label: 'Campanhas'),
-                ],
-              ),
-            ),
-          ),
+                const SliverToBoxAdapter(child: SizedBox(height: 10)),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 10)),
-
-          // Posts feed
-          if (vm.isLoadingPosts)
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  return const Padding(
-                    padding: EdgeInsets.only(bottom: 10),
-                    child: OngPostCardSkeleton(),
-                  );
-                }, childCount: 3),
-              ),
-            )
-          else if (vm.posts.isEmpty)
-            const SliverFillRemaining(
-              child: Center(child: Text('Nenhum post encontrado.')),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final post = vm.posts[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: OngPostCard(
-                      post: post,
-                      onTap: () => context.push('/post-detail', extra: post),
+                // Posts feed
+                if (vm.isLoadingPosts)
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return const Padding(
+                          padding: EdgeInsets.only(bottom: 10),
+                          child: OngPostCardSkeleton(),
+                        );
+                      }, childCount: 3),
                     ),
-                  );
-                }, childCount: vm.posts.length),
+                  )
+                else if (vm.posts.isEmpty)
+                  const SliverFillRemaining(
+                    child: Center(child: Text('Nenhum post encontrado.')),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 92),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final post = vm.posts[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: OngPostCard(
+                            post: post,
+                            onTap:
+                                () => context.push('/post-detail', extra: post),
+                          ),
+                        );
+                      }, childCount: vm.posts.length),
+                    ),
+                  ),
+              ],
+            ),
+            Positioned(
+              right: 20,
+              bottom: 20,
+              child: FloatingActionButton(
+                onPressed: _openNewPost,
+                tooltip: 'Novo post',
+                child: const Icon(Icons.add),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -145,27 +179,24 @@ class _HomeTabState extends State<HomeTab> {
 
 class _CategoryChip extends StatelessWidget {
   final String label;
-  final bool selected;
 
-  const _CategoryChip({required this.label, this.selected = false});
+  const _CategoryChip({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: selected ? AppColors.primary : AppColors.white,
-        border: Border.all(
-          color: selected ? AppColors.primary : AppColors.outlineVariant,
-        ),
-        borderRadius: BorderRadius.circular(20),
+        color: AppColors.white,
+        border: Border.all(color: AppColors.outlineVariant),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: selected ? AppColors.white : AppColors.onSurfaceVariant,
+          color: AppColors.onSurfaceVariant,
         ),
       ),
     );
