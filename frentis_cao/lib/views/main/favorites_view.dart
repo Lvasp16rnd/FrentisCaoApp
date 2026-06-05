@@ -43,6 +43,9 @@ class FavoritesView extends StatelessWidget {
                               onTap:
                                   () =>
                                       context.push('/post-detail', extra: post),
+                              onOrgTap:
+                                  () =>
+                                      context.push('/ong-profile', extra: post),
                               isLiked: vm.isPostLiked(post),
                               isSaved: vm.isPostSaved(post),
                               likeCount: vm.likeCountForPost(post),
