@@ -5,13 +5,16 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:frentis_cao/core/app_theme.dart';
+import 'package:frentis_cao/models/content_models.dart';
 import 'package:frentis_cao/viewmodels/data_view_model.dart';
 import 'package:frentis_cao/views/widgets/app_background.dart';
 import 'package:frentis_cao/views/widgets/app_buttons.dart';
 import 'package:frentis_cao/views/widgets/app_text_field.dart';
 
 class NewPostView extends StatefulWidget {
-  const NewPostView({super.key});
+  final PostModel? post;
+
+  const NewPostView({super.key, this.post});
 
   @override
   State<NewPostView> createState() => _NewPostViewState();
@@ -22,9 +25,21 @@ class _NewPostViewState extends State<NewPostView> {
   final _descriptionCtrl = TextEditingController();
   final _fullDescriptionCtrl = TextEditingController();
 
-  Uint8List? _imageBytes;
-  String? _imageFileName;
+  final List<Uint8List> _imageBytes = [];
+  final List<String> _imageFileNames = [];
   String? _error;
+
+  bool get _isEditing => widget.post != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final post = widget.post;
+    if (post == null) return;
+    _titleCtrl.text = post.title;
+    _descriptionCtrl.text = post.description;
+    _fullDescriptionCtrl.text = post.fullDescription;
+  }
 
   @override
   void dispose() {
@@ -34,14 +49,22 @@ class _NewPostViewState extends State<NewPostView> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (image == null) return;
+  Future<void> _pickImages() async {
+    final images = await ImagePicker().pickMultiImage(limit: 3);
+    if (images.isEmpty) return;
 
-    final bytes = await image.readAsBytes();
+    final selectedImages = images.take(3).toList();
+    final bytes = <Uint8List>[];
+    for (final image in selectedImages) {
+      bytes.add(await image.readAsBytes());
+    }
     setState(() {
-      _imageBytes = bytes;
-      _imageFileName = image.name;
+      _imageBytes
+        ..clear()
+        ..addAll(bytes);
+      _imageFileNames
+        ..clear()
+        ..addAll(selectedImages.map((image) => image.name));
     });
   }
 
@@ -55,13 +78,24 @@ class _NewPostViewState extends State<NewPostView> {
     setState(() => _error = null);
 
     final vm = context.read<DataViewModel>();
-    final success = await vm.createPost(
-      title: title,
-      description: _descriptionCtrl.text.trim(),
-      fullDescription: _fullDescriptionCtrl.text.trim(),
-      imageBytes: _imageBytes,
-      imageFileName: _imageFileName,
-    );
+    final post = widget.post;
+    final success =
+        post == null
+            ? await vm.createPost(
+              title: title,
+              description: _descriptionCtrl.text.trim(),
+              fullDescription: _fullDescriptionCtrl.text.trim(),
+              imageBytes: _imageBytes,
+              imageFileNames: _imageFileNames,
+            )
+            : await vm.updatePost(
+              post: post,
+              title: title,
+              description: _descriptionCtrl.text.trim(),
+              fullDescription: _fullDescriptionCtrl.text.trim(),
+              imageBytes: _imageBytes,
+              imageFileNames: _imageFileNames,
+            );
 
     if (!mounted) return;
     if (success) {
@@ -69,7 +103,13 @@ class _NewPostViewState extends State<NewPostView> {
       return;
     }
 
-    setState(() => _error = 'Nao foi possivel criar o post.');
+    setState(
+      () =>
+          _error =
+              _isEditing
+                  ? 'Nao foi possivel atualizar o post.'
+                  : 'Nao foi possivel criar o post.',
+    );
   }
 
   @override
@@ -99,7 +139,7 @@ class _NewPostViewState extends State<NewPostView> {
                     ),
                     Center(
                       child: Text(
-                        'Novo post',
+                        _isEditing ? 'Editar post' : 'Novo post',
                         style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(color: AppColors.primary),
                       ),
@@ -114,7 +154,7 @@ class _NewPostViewState extends State<NewPostView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       GestureDetector(
-                        onTap: _pickImage,
+                        onTap: _pickImages,
                         child: Container(
                           height: 230,
                           width: double.infinity,
@@ -124,50 +164,10 @@ class _NewPostViewState extends State<NewPostView> {
                             border: Border.all(color: AppColors.outlineVariant),
                           ),
                           clipBehavior: Clip.antiAlias,
-                          child:
-                              _imageBytes == null
-                                  ? const Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.add_photo_alternate_outlined,
-                                        color: AppColors.primary,
-                                        size: 42,
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text('Adicionar imagem'),
-                                    ],
-                                  )
-                                  : Stack(
-                                    fit: StackFit.expand,
-                                    children: [
-                                      Image.memory(
-                                        _imageBytes!,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      Positioned(
-                                        right: 10,
-                                        bottom: 10,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.white,
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.edit_outlined,
-                                            size: 18,
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                          child: _PostImagePickerPreview(
+                            imageBytes: _imageBytes,
+                            imageUrls: widget.post?.imageUrls ?? const [],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -203,7 +203,7 @@ class _NewPostViewState extends State<NewPostView> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                 child: PrimaryButton(
-                  label: 'Publicar post',
+                  label: _isEditing ? 'Salvar post' : 'Publicar post',
                   isLoading: vm.isCreatingPost,
                   onPressed: _submit,
                 ),
@@ -212,6 +212,121 @@ class _NewPostViewState extends State<NewPostView> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PostImagePickerPreview extends StatelessWidget {
+  final List<Uint8List> imageBytes;
+  final List<String> imageUrls;
+
+  const _PostImagePickerPreview({
+    required this.imageBytes,
+    required this.imageUrls,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageBytes.isEmpty && imageUrls.isEmpty) {
+      return const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.add_photo_alternate_outlined,
+            color: AppColors.primary,
+            size: 42,
+          ),
+          SizedBox(height: 8),
+          Text('Adicionar ate 3 imagens'),
+        ],
+      );
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        if (imageBytes.isNotEmpty)
+          _MemoryImagePreview(imageBytes: imageBytes)
+        else
+          _NetworkImagePreview(imageUrls: imageUrls),
+        Positioned(
+          right: 10,
+          bottom: 10,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.edit_outlined,
+              size: 18,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MemoryImagePreview extends StatelessWidget {
+  final List<Uint8List> imageBytes;
+
+  const _MemoryImagePreview({required this.imageBytes});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.all(8),
+      itemCount: imageBytes.length,
+      separatorBuilder: (context, index) => const SizedBox(width: 8),
+      itemBuilder:
+          (context, index) => ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image.memory(
+              imageBytes[index],
+              width: 150,
+              height: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+    );
+  }
+}
+
+class _NetworkImagePreview extends StatelessWidget {
+  final List<String> imageUrls;
+
+  const _NetworkImagePreview({required this.imageUrls});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.all(8),
+      itemCount: imageUrls.length,
+      separatorBuilder: (context, index) => const SizedBox(width: 8),
+      itemBuilder:
+          (context, index) => ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image.network(
+              Uri.encodeFull(imageUrls[index].trim()),
+              width: 150,
+              height: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder:
+                  (context, error, stackTrace) => Container(
+                    width: 150,
+                    color: AppColors.primaryLight.withValues(alpha: 0.25),
+                    child: const Icon(
+                      Icons.broken_image_outlined,
+                      color: AppColors.primary,
+                    ),
+                  ),
+            ),
+          ),
     );
   }
 }

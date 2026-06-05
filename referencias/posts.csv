@@ -1,0 +1,9 @@
+table_schema,table_name,column_name,data_type,is_nullable,column_default,character_maximum_length
+public,posts,id,uuid,NO,gen_random_uuid(),null
+public,posts,title,text,NO,null,null
+public,posts,description,text,YES,null,null
+public,posts,full_description,text,YES,null,null
+public,posts,image_url,text,YES,null,null
+public,posts,tag,text,YES,null,null
+public,posts,org_id,uuid,YES,null,null
+public,posts,created_at,timestamp with time zone,YES,"timezone('utc'::text, now())",null

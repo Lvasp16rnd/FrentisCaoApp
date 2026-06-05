@@ -91,6 +91,12 @@ class AppRouter {
         builder: (context, state) => const NewPostView(),
       ),
       GoRoute(
+        path: '/post-edit',
+        name: 'postEdit',
+        builder:
+            (context, state) => NewPostView(post: state.extra! as PostModel),
+      ),
+      GoRoute(
         path: '/animal-detail',
         name: 'animalDetail',
         builder:

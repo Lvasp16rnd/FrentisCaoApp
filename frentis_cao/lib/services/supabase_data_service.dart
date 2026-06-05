@@ -3,9 +3,15 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frentis_cao/models/content_models.dart';
+import 'package:frentis_cao/models/user_model.dart';
 
 class SupabaseDataService {
+  static const String _postsTable = 'posts';
+
   final SupabaseClient _supabase = Supabase.instance.client;
+
+  String? get currentUserId =>
+      (_supabase.auth.currentSession?.user ?? _supabase.auth.currentUser)?.id;
 
   User _requireAuthenticatedUser() {
     final user =
@@ -21,24 +27,31 @@ class SupabaseDataService {
   Future<List<PostModel>> fetchPosts() async {
     try {
       final response = await _supabase
-          .from('posts')
+          .from(_postsTable)
           .select('*, profiles:org_id(name, avatar_url)')
+          .eq('ativo', true)
           .order('created_at', ascending: false);
 
       final List<dynamic> data = response;
-      return data.map((json) {
-        final postJson = Map<String, dynamic>.from(json as Map);
-        postJson['image_url'] = _storagePublicUrl(postJson['image_url']);
-        return PostModel.fromJson(postJson);
-      }).toList();
+      return data
+          .map((json) {
+            final postJson = Map<String, dynamic>.from(json as Map);
+            postJson['image_url'] = _storagePublicUrls(postJson['image_url']);
+            return PostModel.fromJson(postJson);
+          })
+          .where((post) => post.ativo)
+          .toList();
     } catch (e) {
-      debugPrint('Erro ao buscar posts: $e');
+      debugPrint('Erro ao buscar posts ativos em $_postsTable.ativo: $e');
       return [];
     }
   }
 
-  String _storagePublicUrl(dynamic value) {
-    final raw = _firstImageValue(value);
+  List<String> _storagePublicUrls(dynamic value) {
+    return _imageValues(value).map(_storagePublicUrl).toList();
+  }
+
+  String _storagePublicUrl(String raw) {
     if (raw.isEmpty ||
         raw.startsWith('http://') ||
         raw.startsWith('https://')) {
@@ -50,25 +63,32 @@ class SupabaseDataService {
         .getPublicUrl(raw.replaceFirst(RegExp(r'^/+'), ''));
   }
 
-  String _firstImageValue(dynamic value) {
-    if (value == null) return '';
+  List<String> _imageValues(dynamic value) {
+    if (value == null) return [];
     if (value is List) {
-      return value.isEmpty ? '' : value.first.toString().trim();
+      return value
+          .map((item) => item.toString().trim())
+          .where((item) => item.isNotEmpty)
+          .toList();
     }
 
     final text = value.toString().trim();
-    if (!text.startsWith('[')) return text;
+    if (text.isEmpty) return [];
+    if (!text.startsWith('[')) return [text];
 
     try {
       final decoded = jsonDecode(text);
-      if (decoded is List && decoded.isNotEmpty) {
-        return decoded.first.toString().trim();
+      if (decoded is List) {
+        return decoded
+            .map((item) => item.toString().trim())
+            .where((item) => item.isNotEmpty)
+            .toList();
       }
     } catch (_) {
-      return text;
+      return [text];
     }
 
-    return text;
+    return [text];
   }
 
   /// Busca os animais para adoção
@@ -123,6 +143,33 @@ class SupabaseDataService {
     }
   }
 
+  Future<List<UserModel>> searchOngs({
+    required String query,
+    required int page,
+    int pageSize = 30,
+  }) async {
+    final search = query.trim();
+    if (search.isEmpty) return [];
+
+    try {
+      final from = page * pageSize;
+      final to = from + pageSize - 1;
+      final response = await _supabase
+          .from('profiles')
+          .select('id, name, user_type, phone, avatar_url')
+          .eq('user_type', 'ong')
+          .ilike('name', '%$search%')
+          .order('name', ascending: true)
+          .range(from, to);
+
+      final List<dynamic> data = response;
+      return data.map((json) => UserModel.fromJson(json)).toList();
+    } catch (e) {
+      debugPrint('Erro ao buscar ONGs: $e');
+      return [];
+    }
+  }
+
   Future<String> uploadCampaignImage({
     required Uint8List bytes,
     required String fileName,
@@ -149,12 +196,14 @@ class SupabaseDataService {
   Future<String> uploadPostImage({
     required Uint8List bytes,
     required String fileName,
+    required int index,
   }) async {
     final user = _requireAuthenticatedUser();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final extension = fileName.split('.').last.toLowerCase();
     final safeExtension = extension == fileName ? 'png' : extension;
-    final path = 'private/post_img/${user.id}/$timestamp.$safeExtension';
+    final path =
+        'private/post_img/${user.id}/${timestamp}_$index.$safeExtension';
 
     await _supabase.storage
         .from('frentiscao_images')
@@ -171,24 +220,71 @@ class SupabaseDataService {
     required String title,
     String description = '',
     String fullDescription = '',
-    String imageUrl = '',
+    List<String> imageUrls = const [],
     String tag = '',
   }) async {
     try {
       final user = _requireAuthenticatedUser();
 
-      await _supabase.from('posts').insert({
+      await _supabase.from(_postsTable).insert({
         'title': title,
         'description': description.isEmpty ? null : description,
         'full_description': fullDescription.isEmpty ? null : fullDescription,
-        'image_url': imageUrl.isEmpty ? null : imageUrl,
+        'image_url': imageUrls.isEmpty ? null : jsonEncode(imageUrls),
         'tag': tag.isEmpty ? null : tag,
         'org_id': user.id,
+        'ativo': true,
       });
 
       return true;
     } catch (e) {
       debugPrint('Erro ao criar post: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updatePost({
+    required String id,
+    required String title,
+    String description = '',
+    String fullDescription = '',
+    List<String> imageUrls = const [],
+  }) async {
+    try {
+      final user = _requireAuthenticatedUser();
+
+      await _supabase
+          .from(_postsTable)
+          .update({
+            'title': title,
+            'description': description.isEmpty ? null : description,
+            'full_description':
+                fullDescription.isEmpty ? null : fullDescription,
+            'image_url': imageUrls.isEmpty ? null : jsonEncode(imageUrls),
+          })
+          .eq('id', id)
+          .eq('org_id', user.id);
+
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao atualizar post: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deletePost(String id) async {
+    try {
+      final user = _requireAuthenticatedUser();
+
+      await _supabase
+          .from(_postsTable)
+          .update({'ativo': false})
+          .eq('id', id)
+          .eq('org_id', user.id);
+
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao marcar post como inativo em $_postsTable.ativo: $e');
       return false;
     }
   }

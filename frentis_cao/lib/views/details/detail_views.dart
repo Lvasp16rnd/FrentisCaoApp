@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/models/content_models.dart';
 import 'package:frentis_cao/views/checkout/checkout_mock_view.dart';
+import 'package:frentis_cao/views/widgets/post_image_gallery.dart';
 
 /// Tela de detalhes de um post do feed.
 /// Layout: AppBar verde → header ONG → imagem grande → conteúdo → botões Doar/Compartilhar
@@ -56,11 +57,10 @@ class PostDetailView extends StatelessWidget {
                     ),
 
                     // Image
-                    Container(
+                    PostImageGallery(
+                      imageUrls: post.imageUrls,
                       height: 308,
-                      width: double.infinity,
-                      color: AppColors.primaryLight.withValues(alpha: 0.3),
-                      child: _PostImage(imageUrl: post.imageUrl, iconSize: 60),
+                      placeholderIconSize: 60,
                     ),
 
                     // Content
@@ -641,38 +641,6 @@ String _campaignShareText(CampaignModel campaign) {
     if (campaign.location.isNotEmpty) 'Local: ${campaign.location}',
     if (campaign.date.isNotEmpty) 'Data: ${campaign.date}',
   ].join('\n');
-}
-
-class _PostImage extends StatelessWidget {
-  final String imageUrl;
-  final double iconSize;
-
-  const _PostImage({required this.imageUrl, required this.iconSize});
-
-  @override
-  Widget build(BuildContext context) {
-    final url = Uri.encodeFull(imageUrl.trim());
-    if (url.isEmpty) {
-      return Icon(
-        Icons.image_outlined,
-        size: iconSize,
-        color: AppColors.primary,
-      );
-    }
-
-    return Image.network(
-      url,
-      width: double.infinity,
-      height: double.infinity,
-      fit: BoxFit.cover,
-      errorBuilder:
-          (context, error, stackTrace) => Icon(
-            Icons.image_outlined,
-            size: iconSize,
-            color: AppColors.primary,
-          ),
-    );
-  }
 }
 
 class _CampaignImage extends StatelessWidget {

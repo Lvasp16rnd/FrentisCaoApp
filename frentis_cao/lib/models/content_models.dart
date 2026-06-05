@@ -2,38 +2,48 @@ import 'dart:convert';
 
 class PostModel {
   final String id;
+  final String orgId;
   final String orgName;
   final String orgAvatarUrl;
   final String imageUrl;
+  final List<String> imageUrls;
   final String title;
   final String description;
   final String tag;
   final String fullDescription;
+  final bool ativo;
 
   const PostModel({
     required this.id,
+    required this.orgId,
     required this.orgName,
     required this.orgAvatarUrl,
     required this.imageUrl,
+    this.imageUrls = const [],
     required this.title,
     required this.description,
     this.tag = 'Doar',
     this.fullDescription = '',
+    this.ativo = true,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
     // Para relacionamentos, o Supabase pode retornar um mapa em 'profiles' dependendo da query
     final orgData = json['profiles'] as Map<String, dynamic>?;
+    final imageUrls = _parseStringList(json['image_url']);
 
     return PostModel(
       id: json['id'] as String? ?? '',
+      orgId: json['org_id'] as String? ?? '',
       orgName: _nonEmptyString(orgData?['name'], 'ONG'),
       orgAvatarUrl: orgData?['avatar_url'] as String? ?? '',
-      imageUrl: _firstString(json['image_url']),
+      imageUrl: imageUrls.isEmpty ? '' : imageUrls.first,
+      imageUrls: imageUrls,
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       tag: json['tag'] as String? ?? 'Doar',
       fullDescription: json['full_description'] as String? ?? '',
+      ativo: json['ativo'] as bool? ?? false,
     );
   }
 
@@ -42,35 +52,44 @@ class PostModel {
     return text.isEmpty ? fallback : text;
   }
 
-  static String _firstString(dynamic value) {
-    if (value == null) return '';
+  static List<String> _parseStringList(dynamic value) {
+    if (value == null) return [];
     if (value is List) {
-      return value.isEmpty ? '' : value.first.toString().trim();
+      return value
+          .map((item) => item.toString().trim())
+          .where((item) => item.isNotEmpty)
+          .toList();
     }
 
     final text = value.toString().trim();
-    if (!text.startsWith('[')) return text;
+    if (text.isEmpty) return [];
+    if (!text.startsWith('[')) return [text];
 
     try {
       final decoded = jsonDecode(text);
-      if (decoded is List && decoded.isNotEmpty) {
-        return decoded.first.toString().trim();
+      if (decoded is List) {
+        return decoded
+            .map((item) => item.toString().trim())
+            .where((item) => item.isNotEmpty)
+            .toList();
       }
     } catch (_) {
-      return text;
+      return [text];
     }
 
-    return text;
+    return [text];
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'image_url': imageUrl,
+      'org_id': orgId,
+      'image_url': imageUrls.isNotEmpty ? imageUrls : imageUrl,
       'title': title,
       'description': description,
       'tag': tag,
       'full_description': fullDescription,
+      'ativo': ativo,
       // org_id deveria ser mapeado na hora de inserir no banco, não incluímos orgName aqui
     };
   }
