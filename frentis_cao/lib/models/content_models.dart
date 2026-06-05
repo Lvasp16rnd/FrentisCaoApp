@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class PostModel {
   final String id;
   final String orgName;
@@ -25,7 +27,7 @@ class PostModel {
 
     return PostModel(
       id: json['id'] as String? ?? '',
-      orgName: orgData?['name'] as String? ?? 'ONG',
+      orgName: _nonEmptyString(orgData?['name'], 'ONG'),
       orgAvatarUrl: orgData?['avatar_url'] as String? ?? '',
       imageUrl: json['image_url'] as String? ?? '',
       title: json['title'] as String? ?? '',
@@ -33,6 +35,11 @@ class PostModel {
       tag: json['tag'] as String? ?? 'Doar',
       fullDescription: json['full_description'] as String? ?? '',
     );
+  }
+
+  static String _nonEmptyString(dynamic value, String fallback) {
+    final text = value?.toString().trim() ?? '';
+    return text.isEmpty ? fallback : text;
   }
 
   Map<String, dynamic> toJson() {
@@ -87,7 +94,10 @@ class AnimalModel {
       about: json['about'] as String? ?? '',
       vaccinated: json['vaccinated'] as bool? ?? false,
       castrated: json['castrated'] as bool? ?? false,
-      photoUrls: json['photo_urls'] != null ? List<String>.from(json['photo_urls']) : [],
+      photoUrls:
+          json['photo_urls'] != null
+              ? List<String>.from(json['photo_urls'])
+              : [],
     );
   }
 
@@ -109,14 +119,20 @@ class AnimalModel {
 }
 
 class CampaignModel {
+  static final RegExp _donationMetadataPattern = RegExp(
+    r'^\[donation_enabled=(true|false)\]\r?\n?',
+  );
+
   final String id;
   final String title;
   final String location;
   final String date;
   final String imageUrl;
+  final List<String> imageUrls;
   final String type;
   final String description;
   final String instructions;
+  final bool donationEnabled;
 
   const CampaignModel({
     required this.id,
@@ -125,20 +141,27 @@ class CampaignModel {
     required this.date,
     required this.imageUrl,
     required this.type,
+    this.imageUrls = const [],
     this.description = '',
     this.instructions = '',
+    this.donationEnabled = true,
   });
 
   factory CampaignModel.fromJson(Map<String, dynamic> json) {
+    final imageUrls = _parseImageUrls(json['image_url']);
+    final rawInstructions = json['instructions'] as String? ?? '';
+
     return CampaignModel(
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? '',
       location: json['location'] as String? ?? '',
       date: json['date'] as String? ?? '',
-      imageUrl: json['image_url'] as String? ?? '',
+      imageUrl: imageUrls.isEmpty ? '' : imageUrls.first,
+      imageUrls: imageUrls,
       type: json['type'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      instructions: json['instructions'] as String? ?? '',
+      instructions: _stripDonationMetadata(rawInstructions),
+      donationEnabled: _parseDonationEnabled(rawInstructions),
     );
   }
 
@@ -148,10 +171,72 @@ class CampaignModel {
       'title': title,
       'location': location,
       'date': date,
-      'image_url': imageUrl,
+      'image_url': imageUrls.isNotEmpty ? imageUrls : imageUrl,
       'type': type,
       'description': description,
-      'instructions': instructions,
+      'instructions': encodeInstructionsMetadata(instructions, donationEnabled),
     };
+  }
+
+  static String encodeInstructionsMetadata(
+    String instructions,
+    bool donationEnabled,
+  ) {
+    final cleanInstructions = _stripDonationMetadata(instructions);
+    if (donationEnabled) return cleanInstructions;
+    return '[donation_enabled=false]\n$cleanInstructions';
+  }
+
+  static bool _parseDonationEnabled(String instructions) {
+    final match = _donationMetadataPattern.firstMatch(instructions);
+    if (match == null) return true;
+    return match.group(1) == 'true';
+  }
+
+  static String _stripDonationMetadata(String instructions) {
+    return instructions.replaceFirst(_donationMetadataPattern, '');
+  }
+
+  static List<String> _parseImageUrls(dynamic value) {
+    if (value == null) return [];
+    if (value is List) return value.map((item) => item.toString()).toList();
+    if (value is! String || value.isEmpty) return [];
+
+    final trimmed = value.trim();
+    if (trimmed.startsWith('[')) {
+      try {
+        final decoded = jsonDecode(trimmed);
+        if (decoded is List) {
+          return decoded.map((item) => item.toString()).toList();
+        }
+      } catch (_) {
+        return [value];
+      }
+    }
+
+    return [value];
+  }
+}
+
+class AdoptionModel {
+  final String id;
+  final String animalId;
+  final String status;
+  final AnimalModel? animal;
+
+  const AdoptionModel({
+    required this.id,
+    required this.animalId,
+    required this.status,
+    this.animal,
+  });
+
+  factory AdoptionModel.fromJson(Map<String, dynamic> json) {
+    return AdoptionModel(
+      id: json['id'] as String? ?? '',
+      animalId: json['animal_id'] as String? ?? '',
+      status: json['status'] as String? ?? 'Em Análise',
+      animal: json['animals'] != null ? AnimalModel.fromJson(json['animals']) : null,
+    );
   }
 }

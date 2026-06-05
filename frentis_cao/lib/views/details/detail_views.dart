@@ -1,7 +1,10 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/models/content_models.dart';
+import 'package:frentis_cao/views/checkout/checkout_mock_view.dart';
 
 /// Tela de detalhes de um post do feed.
 /// Layout: AppBar verde → header ONG → imagem grande → conteúdo → botões Doar/Compartilhar
@@ -24,20 +27,29 @@ class PostDetailView extends StatelessWidget {
                   children: [
                     // ONG header
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       child: Row(
                         children: [
                           CircleAvatar(
                             radius: 12,
                             backgroundColor: AppColors.primaryLight,
                             child: Text(
-                              post.orgName[0],
-                              style: const TextStyle(fontSize: 11, color: AppColors.white),
+                              _avatarInitial(post.orgName),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.white,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 6),
                           Expanded(
-                            child: Text(post.orgName, style: Theme.of(context).textTheme.bodyMedium),
+                            child: Text(
+                              post.orgName,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
                           const Icon(Icons.more_horiz, size: 18),
                         ],
@@ -49,7 +61,11 @@ class PostDetailView extends StatelessWidget {
                       height: 308,
                       width: double.infinity,
                       color: AppColors.primaryLight.withValues(alpha: 0.3),
-                      child: const Icon(Icons.image_outlined, size: 60, color: AppColors.primary),
+                      child: const Icon(
+                        Icons.image_outlined,
+                        size: 60,
+                        color: AppColors.primary,
+                      ),
                     ),
 
                     // Content
@@ -60,7 +76,9 @@ class PostDetailView extends StatelessWidget {
                         children: [
                           Text(
                             'Doação necessária',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w500,
                               letterSpacing: 0.5,
                               color: AppColors.black,
@@ -68,18 +86,28 @@ class PostDetailView extends StatelessWidget {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            post.fullDescription.isNotEmpty ? post.fullDescription : post.description,
+                            post.fullDescription.isNotEmpty
+                                ? post.fullDescription
+                                : post.description,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 10),
                           // Tag chip
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.outlineVariant),
+                              border: Border.all(
+                                color: AppColors.outlineVariant,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text(post.tag, style: Theme.of(context).textTheme.labelLarge),
+                            child: Text(
+                              post.tag,
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
                           ),
                         ],
                       ),
@@ -99,14 +127,26 @@ class PostDetailView extends StatelessWidget {
                     width: double.infinity,
                     height: 58,
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => CheckoutMockView(receiverName: post.orgName),
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.volunteer_activism, size: 20),
                       label: const Text('Doar'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFC107),
                         foregroundColor: AppColors.secondaryContainer,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.1,
+                        ),
                       ),
                     ),
                   ),
@@ -116,12 +156,20 @@ class PostDetailView extends StatelessWidget {
                     width: double.infinity,
                     height: 58,
                     child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () => Share.share(_postShareText(post)),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.secondaryContainer,
-                        side: const BorderSide(color: AppColors.secondaryContainer),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.1),
+                        side: const BorderSide(
+                          color: AppColors.secondaryContainer,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.1,
+                        ),
                       ),
                       child: const Text('Compartilhar'),
                     ),
@@ -165,10 +213,19 @@ class AnimalDetailView extends StatelessWidget {
                           width: 131,
                           height: 131,
                           decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withValues(alpha: 0.3),
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.3,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.pets, size: 48, color: AppColors.primary),
+                          clipBehavior: Clip.antiAlias,
+                          child: animal.imageUrl.isNotEmpty
+                              ? Image.network(animal.imageUrl, fit: BoxFit.cover)
+                              : const Icon(
+                                  Icons.pets,
+                                  size: 48,
+                                  color: AppColors.primary,
+                                ),
                         ),
                         const SizedBox(width: 12),
                         // Info panel
@@ -213,7 +270,9 @@ class AnimalDetailView extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      animal.about.isNotEmpty ? animal.about : 'Informações sobre o animal em breve.',
+                      animal.about.isNotEmpty
+                          ? animal.about
+                          : 'Informações sobre o animal em breve.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
@@ -232,15 +291,25 @@ class AnimalDetailView extends StatelessWidget {
                       height: 120,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: 4,
-                        separatorBuilder: (context, index) => const SizedBox(width: 8),
-                        itemBuilder: (_, i) => Container(
+                        itemCount: animal.photoUrls.isNotEmpty ? animal.photoUrls.length : 4,
+                        separatorBuilder:
+                            (context, index) => const SizedBox(width: 8),
+                        itemBuilder:
+                            (_, i) => Container(
                           width: 120,
+                          clipBehavior: Clip.antiAlias,
                           decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withValues(alpha: 0.2),
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.2,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.photo_outlined, color: AppColors.primary),
+                          child: animal.photoUrls.isNotEmpty
+                              ? Image.network(animal.photoUrls[i], fit: BoxFit.cover)
+                              : const Icon(
+                                  Icons.photo_outlined,
+                                  color: AppColors.primary,
+                                ),
                         ),
                       ),
                     ),
@@ -257,14 +326,34 @@ class AnimalDetailView extends StatelessWidget {
                 width: double.infinity,
                 height: 58,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Interesse Registrado!'),
+                        content: Text('A ONG responsável pelo ${animal.name} entrará em contato com você em breve pelo WhatsApp.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.phone, size: 20),
                   label: const Text('Tenho interesse'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.1,
+                    ),
                   ),
                 ),
               ),
@@ -281,16 +370,22 @@ class AnimalDetailView extends StatelessWidget {
         Text(
           '$label: ',
           style: const TextStyle(
-            fontFamily: 'Roboto', fontSize: 14, fontWeight: FontWeight.w600,
-            letterSpacing: 0.1, color: AppColors.onSurfaceVariant,
+            fontFamily: 'Roboto',
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.1,
+            color: AppColors.onSurfaceVariant,
           ),
         ),
         Expanded(
           child: Text(
             value,
             style: const TextStyle(
-              fontFamily: 'Roboto', fontSize: 14, fontWeight: FontWeight.w400,
-              letterSpacing: 0.25, color: AppColors.black,
+              fontFamily: 'Roboto',
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.25,
+              color: AppColors.black,
             ),
           ),
         ),
@@ -302,7 +397,10 @@ class AnimalDetailView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: active ? AppColors.primary.withValues(alpha: 0.12) : AppColors.progressBg,
+        color:
+        active
+            ? AppColors.primary.withValues(alpha: 0.12)
+            : AppColors.progressBg,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -317,7 +415,8 @@ class AnimalDetailView extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              fontSize: 12, fontWeight: FontWeight.w500,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
               color: active ? AppColors.primary : AppColors.grey,
             ),
           ),
@@ -355,10 +454,16 @@ class CampaignDetailView extends StatelessWidget {
                           width: 131,
                           height: 131,
                           decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withValues(alpha: 0.3),
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.3,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.event, size: 48, color: AppColors.primary),
+                          clipBehavior: Clip.antiAlias,
+                          child: _CampaignImage(
+                            imageUrl: campaign.imageUrl,
+                            iconSize: 48,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -370,21 +475,31 @@ class CampaignDetailView extends StatelessWidget {
                                 Text(
                                   campaign.title,
                                   style: const TextStyle(
-                                    fontFamily: 'Roboto', fontSize: 14, fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.1, color: AppColors.onSurfaceVariant,
+                                    fontFamily: 'Roboto',
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.1,
+                                    color: AppColors.darkText,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
-                                    const Icon(Icons.location_on_outlined, size: 14, color: AppColors.onSurfaceVariant),
+                                    const Icon(
+                                      Icons.location_on_outlined,
+                                      size: 14,
+                                      color: AppColors.onSurfaceVariant,
+                                    ),
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
                                         campaign.location,
                                         style: const TextStyle(
-                                          fontFamily: 'Roboto', fontSize: 14, fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.1, color: AppColors.onSurfaceVariant,
+                                          fontFamily: 'Roboto',
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.1,
+                                          color: AppColors.onSurfaceVariant,
                                         ),
                                       ),
                                     ),
@@ -393,13 +508,20 @@ class CampaignDetailView extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
-                                    const Icon(Icons.calendar_today, size: 14, color: AppColors.onSurfaceVariant),
+                                    const Icon(
+                                      Icons.calendar_today,
+                                      size: 14,
+                                      color: AppColors.onSurfaceVariant,
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       campaign.date,
                                       style: const TextStyle(
-                                        fontFamily: 'Roboto', fontSize: 14, fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.1, color: AppColors.onSurfaceVariant,
+                                        fontFamily: 'Roboto',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.1,
+                                        color: AppColors.onSurfaceVariant,
                                       ),
                                     ),
                                   ],
@@ -414,42 +536,42 @@ class CampaignDetailView extends StatelessWidget {
 
                     // Description
                     Text(
-                      campaign.type,
+                      campaign.type.isNotEmpty ? campaign.type : 'Campanha',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500, letterSpacing: 0.5, color: AppColors.black,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5,
+                        color: AppColors.black,
                       ),
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      campaign.description.isNotEmpty ? campaign.description : 'Detalhes da campanha em breve.',
+                      campaign.description.isNotEmpty
+                          ? campaign.description
+                          : 'Detalhes da campanha em breve.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
 
                     // Instructions
                     Text(
-                      'Instruções para levar seu animal',
+                      'Instruções',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500, letterSpacing: 0.5, color: AppColors.black,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5,
+                        color: AppColors.black,
                       ),
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      campaign.instructions.isNotEmpty ? campaign.instructions : 'Instruções em breve.',
+                      campaign.instructions.isNotEmpty
+                          ? campaign.instructions
+                          : 'Instruções em breve.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
 
                     // Campaign image
-                    Container(
-                      width: double.infinity,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight.withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: const Icon(Icons.image_outlined, size: 48, color: AppColors.primary),
-                    ),
+                    _CampaignCarousel(imageUrls: campaign.imageUrls),
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -461,36 +583,54 @@ class CampaignDetailView extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
               child: Column(
                 children: [
-                  // Contact button (green from Figma)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.phone, size: 20),
-                      label: const Text('Contatar'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.1),
+                  if (campaign.donationEnabled) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 58,
+                      child: OutlinedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.volunteer_activism, size: 20),
+                        label: const Text('Doar'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.secondaryContainer,
+                          side: const BorderSide(
+                            color: AppColors.secondaryContainer,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Donate outline button
+                    const SizedBox(height: 8),
+                  ],
                   SizedBox(
                     width: double.infinity,
                     height: 58,
-                    child: OutlinedButton(
-                      onPressed: () {},
+                    child: OutlinedButton.icon(
+                      onPressed:
+                          () => Share.share(_campaignShareText(campaign)),
+                      icon: const Icon(Icons.share_outlined, size: 20),
+                      label: const Text('Compartilhar'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.secondaryContainer,
-                        side: const BorderSide(color: AppColors.secondaryContainer),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.1),
+                        side: const BorderSide(
+                          color: AppColors.secondaryContainer,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.1,
+                        ),
                       ),
-                      child: const Text('Doar'),
                     ),
                   ),
                 ],
@@ -499,6 +639,145 @@ class CampaignDetailView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+String _postShareText(PostModel post) {
+  return [
+    post.title,
+    if (post.description.isNotEmpty) post.description,
+    if (post.orgName.isNotEmpty) 'ONG: ${post.orgName}',
+  ].join('\n');
+}
+
+String _avatarInitial(String value) {
+  final text = value.trim();
+  if (text.isEmpty) return '?';
+  return text[0].toUpperCase();
+}
+
+String _campaignShareText(CampaignModel campaign) {
+  return [
+    campaign.title,
+    if (campaign.description.isNotEmpty) campaign.description,
+    if (campaign.location.isNotEmpty) 'Local: ${campaign.location}',
+    if (campaign.date.isNotEmpty) 'Data: ${campaign.date}',
+  ].join('\n');
+}
+
+class _CampaignImage extends StatelessWidget {
+  final String imageUrl;
+  final double iconSize;
+
+  const _CampaignImage({required this.imageUrl, required this.iconSize});
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageUrl.isEmpty) {
+      return Icon(
+        Icons.image_outlined,
+        size: iconSize,
+        color: AppColors.primary,
+      );
+    }
+
+    return Image.network(
+      imageUrl,
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder:
+          (_, _, _) => Icon(
+        Icons.image_outlined,
+        size: iconSize,
+        color: AppColors.primary,
+      ),
+    );
+  }
+}
+
+class _CampaignCarousel extends StatefulWidget {
+  final List<String> imageUrls;
+
+  const _CampaignCarousel({required this.imageUrls});
+
+  @override
+  State<_CampaignCarousel> createState() => _CampaignCarouselState();
+}
+
+class _CampaignCarouselState extends State<_CampaignCarousel> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrls = widget.imageUrls;
+
+    if (imageUrls.isEmpty) {
+      return Container(
+        width: double.infinity,
+        height: 220,
+        decoration: BoxDecoration(
+          color: AppColors.primaryLight.withValues(alpha: 0.25),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(
+          Icons.image_outlined,
+          size: 48,
+          color: AppColors.primary,
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 220,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: PageView.builder(
+              itemCount: imageUrls.length,
+              onPageChanged: (index) => setState(() => _currentIndex = index),
+              itemBuilder: (context, index) {
+                return Image.network(
+                  imageUrls[index],
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (context, error, stackTrace) => Container(
+                    color: AppColors.primaryLight.withValues(alpha: 0.25),
+                    child: const Icon(
+                      Icons.image_outlined,
+                      size: 48,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        if (imageUrls.length > 1) ...[
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(imageUrls.length, (index) {
+              final selected = index == _currentIndex;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: selected ? 18 : 7,
+                height: 7,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  color:
+                  selected ? AppColors.primary : AppColors.outlineVariant,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              );
+            }),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -514,7 +793,11 @@ Widget _buildAppBar(BuildContext context, String title) {
           top: 12,
           child: GestureDetector(
             onTap: () => context.pop(),
-            child: const Icon(Icons.arrow_back_ios_new, size: 20, color: AppColors.primary),
+            child: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 20,
+              color: AppColors.primary,
+            ),
           ),
         ),
         Center(

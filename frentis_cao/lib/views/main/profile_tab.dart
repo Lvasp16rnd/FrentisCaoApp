@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frentis_cao/views/main/donations_mock_view.dart';
+import 'package:frentis_cao/views/adoptions/my_adoptions_view.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -83,8 +85,14 @@ class ProfileTab extends StatelessWidget {
                   const SizedBox(height: 4),
                   _ProfileOption(
                     icon: Icons.pets,
-                    label: 'Adoções',
-                    onTap: () {},
+                    label: 'Minhas Adoções',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const MyAdoptionsView(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 4),
                   _ProfileOption(
@@ -102,7 +110,13 @@ class ProfileTab extends StatelessWidget {
                   _ProfileOption(
                     icon: Icons.payments_outlined,
                     label: 'Últimas Doações',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const DonationsMockView(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 4),
                   _ProfileOption(
