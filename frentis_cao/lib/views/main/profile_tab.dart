@@ -4,7 +4,6 @@ import 'package:frentis_cao/core/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frentis_cao/views/main/donations_mock_view.dart';
 import 'package:frentis_cao/views/adoptions/my_adoptions_view.dart';
-
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
 
