@@ -48,7 +48,10 @@ class FavoritesView extends StatelessWidget {
                               likeCount: vm.likeCountForPost(post),
                               onLike: () => vm.togglePostLike(post),
                               onSave: () => vm.togglePostSaved(post),
-                              onShare: () => Share.share(_postShareText(post)),
+                              onShare:
+                                  () => SharePlus.instance.share(
+                                    ShareParams(text: _postShareText(post)),
+                                  ),
                             ),
                           );
                         },

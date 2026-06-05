@@ -136,7 +136,10 @@ class PostDetailView extends StatelessWidget {
                     width: double.infinity,
                     height: 58,
                     child: OutlinedButton(
-                      onPressed: () => Share.share(_postShareText(post)),
+                      onPressed:
+                          () => SharePlus.instance.share(
+                            ShareParams(text: _postShareText(post)),
+                          ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.secondaryContainer,
                         side: const BorderSide(
@@ -591,7 +594,9 @@ class CampaignDetailView extends StatelessWidget {
                     height: 58,
                     child: OutlinedButton.icon(
                       onPressed:
-                          () => Share.share(_campaignShareText(campaign)),
+                          () => SharePlus.instance.share(
+                            ShareParams(text: _campaignShareText(campaign)),
+                          ),
                       icon: const Icon(Icons.share_outlined, size: 20),
                       label: const Text('Compartilhar'),
                       style: OutlinedButton.styleFrom(

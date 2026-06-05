@@ -110,7 +110,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   void _sharePost(PostModel post) {
-    Share.share(_postShareText(post));
+    SharePlus.instance.share(ShareParams(text: _postShareText(post)));
   }
 
   void _onSearchChanged(String value) {
