@@ -33,6 +33,7 @@ class _AdoptionTabState extends State<AdoptionTab> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab_adoptions',
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const AddAnimalView()),

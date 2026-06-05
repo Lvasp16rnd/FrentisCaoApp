@@ -12,6 +12,8 @@ import 'package:frentis_cao/views/onboarding/user_data_view.dart';
 import 'package:frentis_cao/views/onboarding/verification_code_view.dart';
 import 'package:frentis_cao/views/onboarding/completion_screen.dart';
 import 'package:frentis_cao/views/main/favorites_view.dart';
+import 'package:frentis_cao/views/main/saved_campaigns_view.dart';
+import 'package:frentis_cao/views/main/recurring_donations_view.dart';
 import 'package:frentis_cao/views/main/main_shell.dart';
 import 'package:frentis_cao/views/details/detail_views.dart';
 
@@ -78,6 +80,16 @@ class AppRouter {
         path: '/favorites',
         name: 'favorites',
         builder: (context, state) => const FavoritesView(),
+      ),
+      GoRoute(
+        path: '/saved-campaigns',
+        name: 'savedCampaigns',
+        builder: (context, state) => const SavedCampaignsView(),
+      ),
+      GoRoute(
+        path: '/recurring-donations',
+        name: 'recurringDonations',
+        builder: (context, state) => const RecurringDonationsView(),
       ),
       GoRoute(
         path: '/post-detail',

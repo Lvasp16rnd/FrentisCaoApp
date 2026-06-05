@@ -13,7 +13,7 @@ class DataViewModel extends ChangeNotifier {
   List<CampaignModel> _campaigns = [];
   List<UserModel> _ongSuggestions = [];
   final Set<String> _likedPostIds = {};
-  final Set<String> _savedPostIds = {};
+  final Set<String> _savedCampaignIds = {};
   final Map<String, int> _postLikeCounts = {};
 
   bool _isLoadingPosts = false;
@@ -34,8 +34,8 @@ class DataViewModel extends ChangeNotifier {
   List<AnimalModel> get animals => _animals;
   List<CampaignModel> get campaigns => _campaigns;
   List<UserModel> get ongSuggestions => _ongSuggestions;
-  List<PostModel> get savedPosts =>
-      _posts.where((post) => _savedPostIds.contains(post.id)).toList();
+  List<CampaignModel> get savedCampaigns =>
+      _campaigns.where((campaign) => _savedCampaignIds.contains(campaign.id)).toList();
 
   bool get isLoadingPosts => _isLoadingPosts;
   bool get isLoadingAnimals => _isLoadingAnimals;
@@ -47,15 +47,24 @@ class DataViewModel extends ChangeNotifier {
 
   bool isPostLiked(PostModel post) => _likedPostIds.contains(post.id);
 
-  bool isPostSaved(PostModel post) => _savedPostIds.contains(post.id);
+  bool isCampaignSaved(CampaignModel campaign) => _savedCampaignIds.contains(campaign.id);
 
-  int likeCountForPost(PostModel post) => _postLikeCounts[post.id] ?? 0;
+  int likeCountForPost(PostModel post) => _postLikeCounts[post.id] ?? post.likeCount;
 
   Future<void> fetchPosts() async {
     _isLoadingPosts = true;
     notifyListeners();
 
     _posts = await _dataService.fetchPosts();
+    final currentUserId = _dataService.currentUserId;
+    if (currentUserId != null) {
+      for (var p in _posts) {
+        if (p.likes.contains(currentUserId)) {
+          _likedPostIds.add(p.id);
+        }
+        _postLikeCounts[p.id] = p.likeCount;
+      }
+    }
 
     _isLoadingPosts = false;
     notifyListeners();
@@ -76,6 +85,14 @@ class DataViewModel extends ChangeNotifier {
     notifyListeners();
 
     _campaigns = await _dataService.fetchCampaigns();
+    final currentUserId = _dataService.currentUserId;
+    if (currentUserId != null) {
+      for (var c in _campaigns) {
+        if (c.saves.contains(currentUserId)) {
+          _savedCampaignIds.add(c.id);
+        }
+      }
+    }
 
     _isLoadingCampaigns = false;
     notifyListeners();
@@ -85,10 +102,13 @@ class DataViewModel extends ChangeNotifier {
     return _dataService.isCurrentUserOng();
   }
 
-  void togglePostLike(PostModel post) {
-    final isLiked = _likedPostIds.contains(post.id);
-    final currentCount = _postLikeCounts[post.id] ?? 0;
+  Future<void> togglePostLike(PostModel post) async {
+    if (_dataService.currentUserId == null) return;
 
+    final isLiked = _likedPostIds.contains(post.id);
+    final currentCount = _postLikeCounts[post.id] ?? post.likeCount;
+
+    // Atualização Otimista
     if (isLiked) {
       _likedPostIds.remove(post.id);
       _postLikeCounts[post.id] = currentCount > 0 ? currentCount - 1 : 0;
@@ -96,18 +116,47 @@ class DataViewModel extends ChangeNotifier {
       _likedPostIds.add(post.id);
       _postLikeCounts[post.id] = currentCount + 1;
     }
-
     notifyListeners();
+
+    // Sincroniza com banco
+    final success = await _dataService.togglePostLike(post.id);
+    if (!success) {
+      // Reverte em caso de erro
+      if (isLiked) {
+        _likedPostIds.add(post.id);
+        _postLikeCounts[post.id] = currentCount;
+      } else {
+        _likedPostIds.remove(post.id);
+        _postLikeCounts[post.id] = currentCount;
+      }
+      notifyListeners();
+    }
   }
 
-  void togglePostSaved(PostModel post) {
-    if (_savedPostIds.contains(post.id)) {
-      _savedPostIds.remove(post.id);
-    } else {
-      _savedPostIds.add(post.id);
-    }
+  Future<void> toggleCampaignSaved(CampaignModel campaign) async {
+    if (_dataService.currentUserId == null) return;
 
+    final isSaved = _savedCampaignIds.contains(campaign.id);
+    
+    // Atualização otimista
+    if (isSaved) {
+      _savedCampaignIds.remove(campaign.id);
+    } else {
+      _savedCampaignIds.add(campaign.id);
+    }
     notifyListeners();
+
+    // Sincroniza com banco
+    final success = await _dataService.toggleCampaignSave(campaign.id);
+    if (!success) {
+      // Reverte em caso de erro
+      if (isSaved) {
+        _savedCampaignIds.add(campaign.id);
+      } else {
+        _savedCampaignIds.remove(campaign.id);
+      }
+      notifyListeners();
+    }
   }
 
   bool ownsPost(PostModel post) {
@@ -225,6 +274,7 @@ class DataViewModel extends ChangeNotifier {
     required String title,
     String description = '',
     String fullDescription = '',
+    String tag = '',
     List<Uint8List> imageBytes = const [],
     List<String> imageFileNames = const [],
   }) async {
@@ -255,6 +305,7 @@ class DataViewModel extends ChangeNotifier {
         description: description,
         fullDescription: fullDescription,
         imageUrls: imageUrls,
+        tag: tag,
       );
 
       if (!updated) return false;

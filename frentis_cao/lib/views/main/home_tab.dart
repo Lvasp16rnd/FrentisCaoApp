@@ -405,6 +405,7 @@ class _HomeTabState extends State<HomeTab> {
               right: 20,
               bottom: 20,
               child: FloatingActionButton(
+                heroTag: 'fab_home',
                 onPressed: _openNewPost,
                 tooltip: 'Novo post',
                 child: const Icon(Icons.add),
@@ -456,14 +457,11 @@ class _HomeTabState extends State<HomeTab> {
                   onEdit: () => _openEditPost(post),
                   onDelete: () => _confirmDeletePost(post),
                   isLiked: context.watch<DataViewModel>().isPostLiked(post),
-                  isSaved: context.watch<DataViewModel>().isPostSaved(post),
                   likeCount: context.watch<DataViewModel>().likeCountForPost(
                     post,
                   ),
                   onLike:
                       () => context.read<DataViewModel>().togglePostLike(post),
-                  onSave:
-                      () => context.read<DataViewModel>().togglePostSaved(post),
                   onShare: () => _sharePost(post),
                 ),
               );
@@ -482,6 +480,8 @@ class _HomeTabState extends State<HomeTab> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: CampaignCard(
                   campaign: campaign,
+                  isSaved: context.watch<DataViewModel>().isCampaignSaved(campaign),
+                  onSave: () => context.read<DataViewModel>().toggleCampaignSaved(campaign),
                   onTap:
                       () => context.push('/campaign-detail', extra: campaign),
                 ),
