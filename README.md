@@ -168,4 +168,15 @@ Para cada nova funcionalidade:
 ## 📌 Status do Projeto
 
 🚧 **Em desenvolvimento**
-🎯 **Foco atual:** Interface mobile e estrutura inicial
+
+✅ **Funcionalidades já implementadas:**
+- Autenticação e Perfis (Ong, Doador, Protetor)
+- Feed de Posts e Listagem de Campanhas e Animais
+- Favoritar Posts e Salvar Campanhas (com persistência no Supabase)
+- Fluxo simulado de Doações Únicas e Recorrentes
+- Criação e Edição de Conteúdos por ONGs
+
+🎯 **Foco atual:** 
+- Fase 2 do Sistema de Adoções (Registro de interesses, tela de gerenciamento para o dono, aprovação/rejeição)
+- Integração oficial via webhook de Pagamentos (Mercado Pago)
+
