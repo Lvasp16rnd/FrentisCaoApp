@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -217,11 +218,14 @@ class AnimalDetailView extends StatelessWidget {
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
-                            Icons.pets,
-                            size: 48,
-                            color: AppColors.primary,
-                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: animal.imageUrl.isNotEmpty
+                              ? Image.network(animal.imageUrl, fit: BoxFit.cover)
+                              : const Icon(
+                                  Icons.pets,
+                                  size: 48,
+                                  color: AppColors.primary,
+                                ),
                         ),
                         const SizedBox(width: 12),
                         // Info panel
@@ -287,22 +291,25 @@ class AnimalDetailView extends StatelessWidget {
                       height: 120,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: 4,
+                        itemCount: animal.photoUrls.isNotEmpty ? animal.photoUrls.length : 4,
                         separatorBuilder:
                             (context, index) => const SizedBox(width: 8),
                         itemBuilder:
                             (_, i) => Container(
                           width: 120,
+                          clipBehavior: Clip.antiAlias,
                           decoration: BoxDecoration(
                             color: AppColors.primaryLight.withValues(
                               alpha: 0.2,
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
-                            Icons.photo_outlined,
-                            color: AppColors.primary,
-                          ),
+                          child: animal.photoUrls.isNotEmpty
+                              ? Image.network(animal.photoUrls[i], fit: BoxFit.cover)
+                              : const Icon(
+                                  Icons.photo_outlined,
+                                  color: AppColors.primary,
+                                ),
                         ),
                       ),
                     ),

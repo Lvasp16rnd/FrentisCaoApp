@@ -217,3 +217,26 @@ class CampaignModel {
     return [value];
   }
 }
+
+class AdoptionModel {
+  final String id;
+  final String animalId;
+  final String status;
+  final AnimalModel? animal;
+
+  const AdoptionModel({
+    required this.id,
+    required this.animalId,
+    required this.status,
+    this.animal,
+  });
+
+  factory AdoptionModel.fromJson(Map<String, dynamic> json) {
+    return AdoptionModel(
+      id: json['id'] as String? ?? '',
+      animalId: json['animal_id'] as String? ?? '',
+      status: json['status'] as String? ?? 'Em Análise',
+      animal: json['animals'] != null ? AnimalModel.fromJson(json['animals']) : null,
+    );
+  }
+}
