@@ -6,6 +6,7 @@ import 'package:frentis_cao/views/widgets/post_image_gallery.dart';
 class OngPostCard extends StatelessWidget {
   final PostModel post;
   final VoidCallback? onTap;
+  final VoidCallback? onOrgTap;
   final bool canManage;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
@@ -18,6 +19,7 @@ class OngPostCard extends StatelessWidget {
     super.key,
     required this.post,
     this.onTap,
+    this.onOrgTap,
     this.canManage = false,
     this.onEdit,
     this.onDelete,
@@ -51,23 +53,41 @@ class OngPostCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundColor: AppColors.primaryLight,
-                    child: Text(
-                      _avatarInitial(post.orgName),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.white,
-                      ),
+                  InkWell(
+                    onTap: onOrgTap,
+                    borderRadius: BorderRadius.circular(20),
+                    child: CircleAvatar(
+                      radius: 12,
+                      backgroundColor: AppColors.primaryLight,
+                      backgroundImage:
+                          post.orgAvatarUrl.isEmpty
+                              ? null
+                              : NetworkImage(post.orgAvatarUrl),
+                      child:
+                          post.orgAvatarUrl.isEmpty
+                              ? Text(
+                                _avatarInitial(post.orgName),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.white,
+                                ),
+                              )
+                              : null,
                     ),
                   ),
                   const SizedBox(width: 6),
                   Expanded(
-                    child: Text(
-                      post.orgName,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      overflow: TextOverflow.ellipsis,
+                    child: InkWell(
+                      onTap: onOrgTap,
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          post.orgName,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
                   ),
                   if (canManage)

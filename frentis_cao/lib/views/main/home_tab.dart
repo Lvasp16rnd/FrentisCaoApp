@@ -163,9 +163,16 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   void _selectOngSuggestion(UserModel ong) {
-    final name = ong.name.trim();
-    _searchCtrl.text = name;
-    _submitSearch(name);
+    _ongSuggestionsDebounce?.cancel();
+    _searchCtrl.text = ong.name.trim();
+    context.read<DataViewModel>().clearOngSuggestions();
+    setState(() {
+      _searchText = ong.name.trim();
+      _submittedSearchText = ong.name.trim();
+      _showOngSuggestions = false;
+    });
+    FocusScope.of(context).unfocus();
+    context.push('/ong-profile', extra: ong);
   }
 
   void _onOngSuggestionsScroll() {
@@ -453,6 +460,7 @@ class _HomeTabState extends State<HomeTab> {
                 child: OngPostCard(
                   post: post,
                   onTap: () => context.push('/post-detail', extra: post),
+                  onOrgTap: () => context.push('/ong-profile', extra: post),
                   canManage: context.read<DataViewModel>().ownsPost(post),
                   onEdit: () => _openEditPost(post),
                   onDelete: () => _confirmDeletePost(post),

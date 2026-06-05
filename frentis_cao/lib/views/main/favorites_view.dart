@@ -71,6 +71,7 @@ class _FavoritesViewState extends State<FavoritesView> {
                         child: OngPostCard(
                           post: post,
                           onTap: () => context.push('/post-detail', extra: post).then((_) => _refreshFavorites()),
+                          onOrgTap: () => context.push('/ong-profile', extra: post),
                           isLiked: isLiked,
                           likeCount: vm.likeCountForPost(post),
                           onLike: () async {
