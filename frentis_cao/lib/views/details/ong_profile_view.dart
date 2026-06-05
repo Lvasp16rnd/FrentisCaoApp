@@ -240,10 +240,8 @@ class _OngPostsList extends StatelessWidget {
             onTap: () => context.push('/post-detail', extra: post),
             canManage: vm.ownsPost(post),
             isLiked: vm.isPostLiked(post),
-            isSaved: vm.isPostSaved(post),
             likeCount: vm.likeCountForPost(post),
             onLike: () => context.read<DataViewModel>().togglePostLike(post),
-            onSave: () => context.read<DataViewModel>().togglePostSaved(post),
             onShare: () => SharePlus.instance.share(ShareParams(text: _postShareText(post))),
           ),
         );
