@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frentis_cao/models/content_models.dart';
 import 'package:frentis_cao/views/auth/login_view.dart';
 import 'package:frentis_cao/views/auth/register_view.dart';
+import 'package:frentis_cao/views/campaigns/new_campaign_view.dart';
 import 'package:frentis_cao/views/onboarding/welcome_screen.dart';
 import 'package:frentis_cao/views/onboarding/user_type_view.dart';
 import 'package:frentis_cao/views/onboarding/terms_view.dart';
@@ -96,6 +97,11 @@ class AppRouter {
         builder:
             (context, state) =>
                 CampaignDetailView(campaign: state.extra! as CampaignModel),
+      ),
+      GoRoute(
+        path: '/campaign-new',
+        name: 'campaignNew',
+        builder: (context, state) => const NewCampaignView(),
       ),
     ],
   );
