@@ -14,6 +14,8 @@ import 'package:frentis_cao/views/onboarding/completion_screen.dart';
 import 'package:frentis_cao/views/main/favorites_view.dart';
 import 'package:frentis_cao/views/main/main_shell.dart';
 import 'package:frentis_cao/views/details/detail_views.dart';
+import 'package:frentis_cao/views/details/ong_profile_view.dart';
+import 'package:frentis_cao/models/user_model.dart';
 
 class AppRouter {
   AppRouter._();
@@ -78,6 +80,16 @@ class AppRouter {
         path: '/favorites',
         name: 'favorites',
         builder: (context, state) => const FavoritesView(),
+      ),
+      GoRoute(
+        path: '/ong-profile',
+        name: 'ongProfile',
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is PostModel) return OngProfileView.fromPost(extra);
+          if (extra is UserModel) return OngProfileView.fromUser(extra);
+          return const OngProfileView(orgId: '', orgName: 'ONG');
+        },
       ),
       GoRoute(
         path: '/post-detail',
