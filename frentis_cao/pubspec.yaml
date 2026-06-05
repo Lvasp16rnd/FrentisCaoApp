@@ -18,8 +18,8 @@ dependencies:
   supabase_flutter: ^2.12.4
   flutter_dotenv: ^6.0.1
   mask_text_input_formatter: ^2.9.0
-  image_picker: ^1.1.2
-  share_plus: ^10.1.4
+  share_plus: ^13.1.0
+  image_picker: ^1.2.2
 
 dev_dependencies:
   flutter_test:

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:frentis_cao/viewmodels/data_view_model.dart';
 import 'package:frentis_cao/views/widgets/adoption_card.dart';
 import 'package:frentis_cao/views/widgets/empty_state.dart';
+import 'package:frentis_cao/views/adoptions/add_animal_view.dart';
 import 'package:frentis_cao/views/widgets/skeleton_cards.dart';
 
 class AdoptionTab extends StatefulWidget {
@@ -29,9 +30,22 @@ class _AdoptionTabState extends State<AdoptionTab> {
   Widget build(BuildContext context) {
     final vm = context.watch<DataViewModel>();
 
-    return SafeArea(
-      child: CustomScrollView(
-        slivers: [
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AddAnimalView()),
+          );
+        },
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.pets),
+        label: const Text('Cadastrar'),
+      ),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
@@ -87,7 +101,8 @@ class _AdoptionTabState extends State<AdoptionTab> {
                 }, childCount: vm.animals.length),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
