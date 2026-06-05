@@ -605,14 +605,11 @@ class CampaignDetailView extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     height: 58,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => CheckoutMockView(receiverName: campaign.title),
-                          ),
-                        );
-                      },
+                    child: OutlinedButton.icon(
+                      onPressed:
+                          () => Share.share(_campaignShareText(campaign)),
+                      icon: const Icon(Icons.share_outlined, size: 20),
+                      label: const Text('Compartilhar'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.secondaryContainer,
                         side: const BorderSide(
