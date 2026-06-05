@@ -124,6 +124,79 @@ class SupabaseDataService {
     }
   }
 
+  // --- FAVORITOS E SALVOS ---
+
+  Future<bool> togglePostLike(String postId) async {
+    try {
+      _requireAuthenticatedUser();
+      
+      await _supabase.rpc('toggle_post_like', params: {'p_post_id': postId});
+
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao alternar like no post: $e');
+      return false;
+    }
+  }
+
+  Future<bool> toggleCampaignSave(String campaignId) async {
+    try {
+      _requireAuthenticatedUser();
+      
+      await _supabase.rpc('toggle_campaign_save', params: {'p_campaign_id': campaignId});
+
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao salvar campanha: $e');
+      return false;
+    }
+  }
+
+  Future<List<PostModel>> fetchMyFavoritePosts() async {
+    try {
+      final userId = currentUserId;
+      if (userId == null) return [];
+
+      final response = await _supabase
+          .from(_postsTable)
+          .select('*, profiles:org_id(name, avatar_url)')
+          .eq('ativo', true)
+          .contains('likes', [userId])
+          .order('created_at', ascending: false);
+
+      final List<dynamic> data = response;
+      return data.map((json) {
+        final postJson = Map<String, dynamic>.from(json as Map);
+        postJson['image_url'] = _storagePublicUrls(postJson['image_url']);
+        return PostModel.fromJson(postJson);
+      }).toList();
+    } catch (e) {
+      debugPrint('Erro ao buscar posts favoritos: $e');
+      return [];
+    }
+  }
+
+  Future<List<CampaignModel>> fetchMySavedCampaigns() async {
+    try {
+      final userId = currentUserId;
+      if (userId == null) return [];
+
+      final response = await _supabase
+          .from('campaigns')
+          .select()
+          .contains('saves', [userId])
+          .order('created_at', ascending: false);
+
+      final List<dynamic> data = response;
+      return data.map((json) => CampaignModel.fromJson(json)).toList();
+    } catch (e) {
+      debugPrint('Erro ao buscar campanhas salvas: $e');
+      return [];
+    }
+  }
+
+  // --------------------------
+
   /// Insere um novo animal para adoção
   Future<bool> insertAnimal({
     required String name,
@@ -331,7 +404,7 @@ class SupabaseDataService {
         'title': title,
         'description': description.isEmpty ? null : description,
         'full_description': fullDescription.isEmpty ? null : fullDescription,
-        'image_url': imageUrls.isEmpty ? null : jsonEncode(imageUrls),
+        'image_url': imageUrls.isEmpty ? null : imageUrls,
         'tag': tag.isEmpty ? null : tag,
         'org_id': user.id,
         'ativo': true,
@@ -349,6 +422,7 @@ class SupabaseDataService {
     required String title,
     String description = '',
     String fullDescription = '',
+    String tag = '',
     List<String> imageUrls = const [],
   }) async {
     try {
@@ -361,7 +435,8 @@ class SupabaseDataService {
             'description': description.isEmpty ? null : description,
             'full_description':
                 fullDescription.isEmpty ? null : fullDescription,
-            'image_url': imageUrls.isEmpty ? null : jsonEncode(imageUrls),
+            'image_url': imageUrls.isEmpty ? null : imageUrls,
+            'tag': tag.isEmpty ? null : tag,
           })
           .eq('id', id)
           .eq('org_id', user.id);

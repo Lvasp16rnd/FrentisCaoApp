@@ -11,10 +11,8 @@ class OngPostCard extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final bool isLiked;
-  final bool isSaved;
   final int likeCount;
   final VoidCallback? onLike;
-  final VoidCallback? onSave;
   final VoidCallback? onShare;
 
   const OngPostCard({
@@ -26,10 +24,8 @@ class OngPostCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.isLiked = false,
-    this.isSaved = false,
     this.likeCount = 0,
     this.onLike,
-    this.onSave,
     this.onShare,
   });
 
@@ -195,10 +191,8 @@ class OngPostCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   _PostActionBar(
                     isLiked: isLiked,
-                    isSaved: isSaved,
                     likeCount: likeCount,
                     onLike: onLike,
-                    onSave: onSave,
                     onShare: onShare,
                   ),
                 ],
@@ -215,18 +209,14 @@ enum _PostAction { edit, delete }
 
 class _PostActionBar extends StatelessWidget {
   final bool isLiked;
-  final bool isSaved;
   final int likeCount;
   final VoidCallback? onLike;
-  final VoidCallback? onSave;
   final VoidCallback? onShare;
 
   const _PostActionBar({
     required this.isLiked,
-    required this.isSaved,
     required this.likeCount,
     this.onLike,
-    this.onSave,
     this.onShare,
   });
 
@@ -239,13 +229,6 @@ class _PostActionBar extends StatelessWidget {
           label: likeCount.toString(),
           color: isLiked ? AppColors.error : AppColors.onSurfaceVariant,
           onTap: onLike,
-        ),
-        const SizedBox(width: 4),
-        _ActionButton(
-          icon: isSaved ? Icons.bookmark : Icons.bookmark_border,
-          label: 'Salvar',
-          color: isSaved ? AppColors.primary : AppColors.onSurfaceVariant,
-          onTap: onSave,
         ),
         const Spacer(),
         _ActionButton(

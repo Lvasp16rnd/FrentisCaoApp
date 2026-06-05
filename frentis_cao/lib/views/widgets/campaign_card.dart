@@ -4,9 +4,11 @@ import 'package:frentis_cao/models/content_models.dart';
 
 class CampaignCard extends StatelessWidget {
   final CampaignModel campaign;
+  final bool isSaved;
+  final VoidCallback? onSave;
   final VoidCallback? onTap;
 
-  const CampaignCard({super.key, required this.campaign, this.onTap});
+  const CampaignCard({super.key, required this.campaign, this.isSaved = false, this.onSave, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -58,15 +60,29 @@ class CampaignCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      campaign.title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.darkText,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            campaign.title,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.darkText,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: onSave,
+                          child: Icon(
+                            isSaved ? Icons.bookmark : Icons.bookmark_border,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     _InfoLine(

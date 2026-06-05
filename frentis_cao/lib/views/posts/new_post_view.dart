@@ -24,6 +24,7 @@ class _NewPostViewState extends State<NewPostView> {
   final _titleCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
   final _fullDescriptionCtrl = TextEditingController();
+  final _tagCtrl = TextEditingController();
 
   final List<Uint8List> _imageBytes = [];
   final List<String> _imageFileNames = [];
@@ -39,6 +40,7 @@ class _NewPostViewState extends State<NewPostView> {
     _titleCtrl.text = post.title;
     _descriptionCtrl.text = post.description;
     _fullDescriptionCtrl.text = post.fullDescription;
+    _tagCtrl.text = post.tag;
   }
 
   @override
@@ -46,6 +48,7 @@ class _NewPostViewState extends State<NewPostView> {
     _titleCtrl.dispose();
     _descriptionCtrl.dispose();
     _fullDescriptionCtrl.dispose();
+    _tagCtrl.dispose();
     super.dispose();
   }
 
@@ -85,6 +88,7 @@ class _NewPostViewState extends State<NewPostView> {
               title: title,
               description: _descriptionCtrl.text.trim(),
               fullDescription: _fullDescriptionCtrl.text.trim(),
+              tag: _tagCtrl.text.trim(),
               imageBytes: _imageBytes,
               imageFileNames: _imageFileNames,
             )
@@ -93,6 +97,7 @@ class _NewPostViewState extends State<NewPostView> {
               title: title,
               description: _descriptionCtrl.text.trim(),
               fullDescription: _fullDescriptionCtrl.text.trim(),
+              tag: _tagCtrl.text.trim(),
               imageBytes: _imageBytes,
               imageFileNames: _imageFileNames,
             );
@@ -186,6 +191,8 @@ class _NewPostViewState extends State<NewPostView> {
                         minLines: 4,
                         maxLines: 7,
                       ),
+                      const SizedBox(height: 12),
+                      AppTextField(label: 'Tag (ex: Recorrente)', controller: _tagCtrl),
                       if (_error != null) ...[
                         const SizedBox(height: 12),
                         Text(

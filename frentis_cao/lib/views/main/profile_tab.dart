@@ -283,13 +283,13 @@ class _ProfileTabState extends State<ProfileTab> {
                   _ProfileOption(
                     icon: Icons.access_time_filled,
                     label: 'Doações Recorrentes',
-                    onTap: () {},
+                    onTap: () => context.push('/recurring-donations'),
                   ),
                   const SizedBox(height: 4),
                   _ProfileOption(
                     icon: Icons.event,
                     label: 'Campanhas Salvas',
-                    onTap: () {},
+                    onTap: () => context.push('/saved-campaigns'),
                   ),
                   const SizedBox(height: 4),
                   _ProfileOption(

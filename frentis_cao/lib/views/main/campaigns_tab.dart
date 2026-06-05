@@ -84,6 +84,8 @@ class _CampaignsTabState extends State<CampaignsTab> {
                         padding: const EdgeInsets.only(bottom: 12),
                         child: CampaignCard(
                           campaign: campaign,
+                          isSaved: vm.isCampaignSaved(campaign),
+                          onSave: () => vm.toggleCampaignSaved(campaign),
                           onTap:
                               () => context.push(
                                 '/campaign-detail',
@@ -101,6 +103,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
               right: 20,
               bottom: 20,
               child: FloatingActionButton(
+                heroTag: 'fab_campaigns',
                 onPressed: _openNewCampaign,
                 tooltip: 'Nova campanha',
                 child: const Icon(Icons.add),

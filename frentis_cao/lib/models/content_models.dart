@@ -12,6 +12,8 @@ class PostModel {
   final String tag;
   final String fullDescription;
   final bool ativo;
+  final List<String> likes;
+  final int likeCount;
 
   const PostModel({
     required this.id,
@@ -25,12 +27,15 @@ class PostModel {
     this.tag = 'Doar',
     this.fullDescription = '',
     this.ativo = true,
+    this.likes = const [],
+    this.likeCount = 0,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
     // Para relacionamentos, o Supabase pode retornar um mapa em 'profiles' dependendo da query
     final orgData = json['profiles'] as Map<String, dynamic>?;
     final imageUrls = _parseStringList(json['image_url']);
+    final likesList = _parseStringList(json['likes']);
 
     return PostModel(
       id: json['id'] as String? ?? '',
@@ -44,6 +49,8 @@ class PostModel {
       tag: json['tag'] as String? ?? 'Doar',
       fullDescription: json['full_description'] as String? ?? '',
       ativo: json['ativo'] as bool? ?? false,
+      likes: likesList,
+      likeCount: json['like_count'] as int? ?? likesList.length,
     );
   }
 
@@ -173,6 +180,7 @@ class CampaignModel {
   final String description;
   final String instructions;
   final bool donationEnabled;
+  final List<String> saves;
 
   const CampaignModel({
     required this.id,
@@ -185,11 +193,13 @@ class CampaignModel {
     this.description = '',
     this.instructions = '',
     this.donationEnabled = true,
+    this.saves = const [],
   });
 
   factory CampaignModel.fromJson(Map<String, dynamic> json) {
     final imageUrls = _parseImageUrls(json['image_url']);
     final rawInstructions = json['instructions'] as String? ?? '';
+    final savesList = _parseImageUrls(json['saves']); // reaproveitando parser de arrays de string
 
     return CampaignModel(
       id: json['id'] as String? ?? '',
@@ -202,6 +212,7 @@ class CampaignModel {
       description: json['description'] as String? ?? '',
       instructions: _stripDonationMetadata(rawInstructions),
       donationEnabled: _parseDonationEnabled(rawInstructions),
+      saves: savesList,
     );
   }
 

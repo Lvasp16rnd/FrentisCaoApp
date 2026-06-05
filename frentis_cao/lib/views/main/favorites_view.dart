@@ -8,13 +8,33 @@ import 'package:frentis_cao/viewmodels/data_view_model.dart';
 import 'package:frentis_cao/views/widgets/empty_state.dart';
 import 'package:frentis_cao/views/widgets/ong_post_card.dart';
 
-class FavoritesView extends StatelessWidget {
+import 'package:frentis_cao/services/supabase_data_service.dart';
+
+class FavoritesView extends StatefulWidget {
   const FavoritesView({super.key});
+
+  @override
+  State<FavoritesView> createState() => _FavoritesViewState();
+}
+
+class _FavoritesViewState extends State<FavoritesView> {
+  late Future<List<PostModel>> _favoritesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _favoritesFuture = SupabaseDataService().fetchMyFavoritePosts();
+  }
+
+  void _refreshFavorites() {
+    setState(() {
+      _favoritesFuture = SupabaseDataService().fetchMyFavoritePosts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<DataViewModel>();
-    final posts = vm.savedPosts;
 
     return Scaffold(
       body: SafeArea(
@@ -22,43 +42,51 @@ class FavoritesView extends StatelessWidget {
           children: [
             _FavoritesAppBar(onBack: () => context.pop()),
             Expanded(
-              child:
-                  posts.isEmpty
-                      ? const EmptyState(
-                        icon: Icons.bookmark_border,
-                        title: 'Voce ainda nao salvou posts',
-                        message:
-                            'Toque em Salvar nos posts que quiser encontrar novamente aqui.',
-                        topPadding: 0,
-                      )
-                      : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                        itemCount: posts.length,
-                        itemBuilder: (context, index) {
-                          final post = posts[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: OngPostCard(
-                              post: post,
-                              onTap:
-                                  () =>
-                                      context.push('/post-detail', extra: post),
-                              onOrgTap:
-                                  () =>
-                                      context.push('/ong-profile', extra: post),
-                              isLiked: vm.isPostLiked(post),
-                              isSaved: vm.isPostSaved(post),
-                              likeCount: vm.likeCountForPost(post),
-                              onLike: () => vm.togglePostLike(post),
-                              onSave: () => vm.togglePostSaved(post),
-                              onShare:
-                                  () => SharePlus.instance.share(
-                                    ShareParams(text: _postShareText(post)),
-                                  ),
-                            ),
-                          );
-                        },
-                      ),
+              child: FutureBuilder<List<PostModel>>(
+                future: _favoritesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  final posts = snapshot.data ?? [];
+                  if (posts.isEmpty) {
+                    return const EmptyState(
+                      icon: Icons.favorite_border,
+                      title: 'Você ainda não tem posts favoritos',
+                      message: 'Toque no coração nos posts para encontra-los aqui.',
+                      topPadding: 0,
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                    itemCount: posts.length,
+                    itemBuilder: (context, index) {
+                      final post = posts[index];
+                      // Sincronizando com o viewmodel (otimista) pra sumir/voltar o coração
+                      final isLiked = vm.isPostLiked(post) || post.likes.contains(SupabaseDataService().currentUserId);
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: OngPostCard(
+                          post: post,
+                          onTap: () => context.push('/post-detail', extra: post).then((_) => _refreshFavorites()),
+                          onOrgTap: () => context.push('/ong-profile', extra: post),
+                          isLiked: isLiked,
+                          likeCount: vm.likeCountForPost(post),
+                          onLike: () async {
+                            await vm.togglePostLike(post);
+                            _refreshFavorites();
+                          },
+                          onShare: () => SharePlus.instance.share(
+                            ShareParams(text: _postShareText(post)),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),

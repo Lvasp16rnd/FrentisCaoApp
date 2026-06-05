@@ -6,10 +6,12 @@ import 'package:frentis_cao/views/checkout/payment_success_view.dart';
 
 class CheckoutMockView extends StatefulWidget {
   final String receiverName;
+  final bool isRecurring;
 
   const CheckoutMockView({
     super.key,
     required this.receiverName,
+    this.isRecurring = false,
   });
 
   @override
@@ -18,10 +20,17 @@ class CheckoutMockView extends StatefulWidget {
 
 class _CheckoutMockViewState extends State<CheckoutMockView> {
   double _selectedAmount = 10.0;
-  String _selectedMethod = 'pix';
+  late String _selectedMethod;
   bool _isLoading = false;
 
   final List<double> _presetAmounts = [10.0, 20.0, 50.0, 100.0];
+
+  @override
+  void initState() {
+    super.initState();
+    // Se for recorrente, forçar o uso do cartão
+    _selectedMethod = widget.isRecurring ? 'card' : 'pix';
+  }
 
   void _processMockPayment() async {
     setState(() {
@@ -57,6 +66,32 @@ class _CheckoutMockViewState extends State<CheckoutMockView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (widget.isRecurring) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.pink[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.pink[200]!),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.favorite, color: Colors.pink),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Assinatura Mensal - Apoio Recorrente',
+                        style: TextStyle(
+                          color: Colors.pink,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
             // Cabeçalho
             Text(
               'Ajudando:',
@@ -88,7 +123,7 @@ class _CheckoutMockViewState extends State<CheckoutMockView> {
                 final isSelected = _selectedAmount == amount;
                 return ChoiceChip(
                   label: Text(
-                    'R\$ ${amount.toInt()}',
+                    widget.isRecurring ? 'R\$ ${amount.toInt()}/mês' : 'R\$ ${amount.toInt()}',
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.black87,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -123,23 +158,25 @@ class _CheckoutMockViewState extends State<CheckoutMockView> {
               ),
               child: Column(
                 children: [
-                  RadioListTile<String>(
-                    title: const Row(
-                      children: [
-                        Icon(Icons.pix, color: Colors.teal),
-                        SizedBox(width: 12),
-                        Text('Pix (Aprovação imediata)'),
-                      ],
+                  if (!widget.isRecurring) ...[
+                    RadioListTile<String>(
+                      title: const Row(
+                        children: [
+                          Icon(Icons.pix, color: Colors.teal),
+                          SizedBox(width: 12),
+                          Text('Pix (Aprovação imediata)'),
+                        ],
+                      ),
+                      value: 'pix',
+                      groupValue: _selectedMethod,
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedMethod = val!;
+                        });
+                      },
                     ),
-                    value: 'pix',
-                    groupValue: _selectedMethod,
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedMethod = val!;
-                      });
-                    },
-                  ),
-                  const Divider(height: 1),
+                    const Divider(height: 1),
+                  ],
                   RadioListTile<String>(
                     title: const Row(
                       children: [

@@ -104,31 +104,37 @@ class PostDetailView extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     height: 58,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder:
-                                (_) => CheckoutMockView(
+                    child: Builder(
+                      builder: (context) {
+                        final isRecurring = post.tag.toLowerCase() == 'recorrente' || 
+                                            post.tag.toLowerCase() == 'assinatura';
+                        return ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => CheckoutMockView(
                                   receiverName: post.orgName,
+                                  isRecurring: isRecurring,
                                 ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.volunteer_activism, size: 20),
+                          label: Text(isRecurring ? 'Apoiar Mensalmente' : 'Doar'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFC107),
+                            foregroundColor: AppColors.secondaryContainer,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.1,
+                            ),
                           ),
                         );
-                      },
-                      icon: const Icon(Icons.volunteer_activism, size: 20),
-                      label: const Text('Doar'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFC107),
-                        foregroundColor: AppColors.secondaryContainer,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.1,
-                        ),
-                      ),
+                      }
                     ),
                   ),
                   const SizedBox(height: 8),
