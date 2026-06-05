@@ -100,8 +100,8 @@ class ProfileTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   _ProfileOption(
-                    icon: Icons.payments_outlined, 
-                    label: 'Últimas Doações', 
+                    icon: Icons.payments_outlined,
+                    label: 'Últimas Doações',
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
