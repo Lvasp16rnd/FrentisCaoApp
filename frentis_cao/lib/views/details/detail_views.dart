@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/models/content_models.dart';
+import 'package:frentis_cao/views/checkout/checkout_mock_view.dart';
 
 /// Tela de detalhes de um post do feed.
 /// Layout: AppBar verde → header ONG → imagem grande → conteúdo → botões Doar/Compartilhar
@@ -125,7 +126,13 @@ class PostDetailView extends StatelessWidget {
                     width: double.infinity,
                     height: 58,
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => CheckoutMockView(receiverName: post.orgName),
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.volunteer_activism, size: 20),
                       label: const Text('Doar'),
                       style: ElevatedButton.styleFrom(
@@ -312,7 +319,21 @@ class AnimalDetailView extends StatelessWidget {
                 width: double.infinity,
                 height: 58,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Interesse Registrado!'),
+                        content: Text('A ONG responsável pelo ${animal.name} entrará em contato com você em breve pelo WhatsApp.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.phone, size: 20),
                   label: const Text('Tenho interesse'),
                   style: ElevatedButton.styleFrom(
@@ -584,11 +605,14 @@ class CampaignDetailView extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     height: 58,
-                    child: OutlinedButton.icon(
-                      onPressed:
-                          () => Share.share(_campaignShareText(campaign)),
-                      icon: const Icon(Icons.share_outlined, size: 20),
-                      label: const Text('Compartilhar'),
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => CheckoutMockView(receiverName: campaign.title),
+                          ),
+                        );
+                      },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.secondaryContainer,
                         side: const BorderSide(
