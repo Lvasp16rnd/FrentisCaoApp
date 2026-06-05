@@ -34,7 +34,9 @@ class AdoptionCard extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 color: AppColors.primaryLight.withValues(alpha: 0.25),
-                child: const Icon(Icons.pets, size: 40, color: AppColors.primary),
+                child: animal.imageUrl.isNotEmpty
+                    ? Image.network(animal.imageUrl, fit: BoxFit.cover)
+                    : const Icon(Icons.pets, size: 40, color: AppColors.primary),
               ),
             ),
             // Info
