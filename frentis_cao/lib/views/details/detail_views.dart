@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:frentis_cao/core/app_theme.dart';
 import 'package:frentis_cao/models/content_models.dart';
 import 'package:frentis_cao/views/checkout/checkout_mock_view.dart';
+import 'package:frentis_cao/views/widgets/post_image_gallery.dart';
 
 /// Tela de detalhes de um post do feed.
 /// Layout: AppBar verde → header ONG → imagem grande → conteúdo → botões Doar/Compartilhar
@@ -51,21 +52,16 @@ class PostDetailView extends StatelessWidget {
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ),
-                          const Icon(Icons.more_horiz, size: 18),
+                          const Icon(Icons.more_vert, size: 18),
                         ],
                       ),
                     ),
 
                     // Image
-                    Container(
+                    PostImageGallery(
+                      imageUrls: post.imageUrls,
                       height: 308,
-                      width: double.infinity,
-                      color: AppColors.primaryLight.withValues(alpha: 0.3),
-                      child: const Icon(
-                        Icons.image_outlined,
-                        size: 60,
-                        color: AppColors.primary,
-                      ),
+                      placeholderIconSize: 60,
                     ),
 
                     // Content
@@ -75,7 +71,7 @@ class PostDetailView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Doação necessária',
+                            post.title,
                             style: Theme.of(
                               context,
                             ).textTheme.titleMedium?.copyWith(
@@ -90,24 +86,6 @@ class PostDetailView extends StatelessWidget {
                                 ? post.fullDescription
                                 : post.description,
                             style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const SizedBox(height: 10),
-                          // Tag chip
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.outlineVariant,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              post.tag,
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
                           ),
                         ],
                       ),
@@ -130,7 +108,10 @@ class PostDetailView extends StatelessWidget {
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => CheckoutMockView(receiverName: post.orgName),
+                            builder:
+                                (_) => CheckoutMockView(
+                                  receiverName: post.orgName,
+                                ),
                           ),
                         );
                       },
@@ -156,7 +137,10 @@ class PostDetailView extends StatelessWidget {
                     width: double.infinity,
                     height: 58,
                     child: OutlinedButton(
-                      onPressed: () => Share.share(_postShareText(post)),
+                      onPressed:
+                          () => SharePlus.instance.share(
+                            ShareParams(text: _postShareText(post)),
+                          ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.secondaryContainer,
                         side: const BorderSide(
@@ -329,16 +313,19 @@ class AnimalDetailView extends StatelessWidget {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Interesse Registrado!'),
-                        content: Text('A ONG responsável pelo ${animal.name} entrará em contato com você em breve pelo WhatsApp.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(),
-                            child: const Text('OK'),
+                      builder:
+                          (ctx) => AlertDialog(
+                            title: const Text('Interesse Registrado!'),
+                            content: Text(
+                              'A ONG responsável pelo ${animal.name} entrará em contato com você em breve pelo WhatsApp.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text('OK'),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
                     );
                   },
                   icon: const Icon(Icons.phone, size: 20),
@@ -398,9 +385,9 @@ class AnimalDetailView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color:
-        active
-            ? AppColors.primary.withValues(alpha: 0.12)
-            : AppColors.progressBg,
+            active
+                ? AppColors.primary.withValues(alpha: 0.12)
+                : AppColors.progressBg,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -614,7 +601,9 @@ class CampaignDetailView extends StatelessWidget {
                     height: 58,
                     child: OutlinedButton.icon(
                       onPressed:
-                          () => Share.share(_campaignShareText(campaign)),
+                          () => SharePlus.instance.share(
+                            ShareParams(text: _campaignShareText(campaign)),
+                          ),
                       icon: const Icon(Icons.share_outlined, size: 20),
                       label: const Text('Compartilhar'),
                       style: OutlinedButton.styleFrom(
@@ -689,10 +678,10 @@ class _CampaignImage extends StatelessWidget {
       fit: BoxFit.cover,
       errorBuilder:
           (_, _, _) => Icon(
-        Icons.image_outlined,
-        size: iconSize,
-        color: AppColors.primary,
-      ),
+            Icons.image_outlined,
+            size: iconSize,
+            color: AppColors.primary,
+          ),
     );
   }
 }
@@ -745,13 +734,13 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
                   fit: BoxFit.cover,
                   errorBuilder:
                       (context, error, stackTrace) => Container(
-                    color: AppColors.primaryLight.withValues(alpha: 0.25),
-                    child: const Icon(
-                      Icons.image_outlined,
-                      size: 48,
-                      color: AppColors.primary,
-                    ),
-                  ),
+                        color: AppColors.primaryLight.withValues(alpha: 0.25),
+                        child: const Icon(
+                          Icons.image_outlined,
+                          size: 48,
+                          color: AppColors.primary,
+                        ),
+                      ),
                 );
               },
             ),
@@ -770,7 +759,7 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
                 margin: const EdgeInsets.symmetric(horizontal: 3),
                 decoration: BoxDecoration(
                   color:
-                  selected ? AppColors.primary : AppColors.outlineVariant,
+                      selected ? AppColors.primary : AppColors.outlineVariant,
                   borderRadius: BorderRadius.circular(10),
                 ),
               );
