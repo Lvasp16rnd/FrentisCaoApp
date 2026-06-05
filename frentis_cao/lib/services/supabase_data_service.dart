@@ -423,4 +423,71 @@ class SupabaseDataService {
       return false;
     }
   }
+
+  /// Busca os dados do usuário logado (nome, telefone, foto) + email do auth
+  Future<Map<String, dynamic>?> fetchUserProfile() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return null;
+
+      final response = await _supabase
+          .from('profiles')
+          .select('name, phone, avatar_url')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      if (response != null) {
+        response['email'] = user.email;
+      }
+      return response;
+    } catch (e) {
+      debugPrint('Erro ao buscar perfil do usuário: $e');
+      return null;
+    }
+  }
+
+  /// Faz o upload de uma nova foto de perfil e atualiza a tabela profiles
+  Future<String?> uploadUserAvatar(File imageFile) async {
+    try {
+      final user = _requireAuthenticatedUser();
+      
+      final fileExt = imageFile.path.split('.').last.toLowerCase();
+      final safeExtension = fileExt == imageFile.path ? 'png' : fileExt;
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.$safeExtension';
+      
+      // Mudando para 'private/' para respeitar a política RLS igual aos animais
+      final filePath = 'private/avatars/${user.id}/$fileName';
+      
+      await _supabase.storage.from('frentiscao_images').upload(
+            filePath,
+            imageFile,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+          );
+
+      final imageUrl = _supabase.storage.from('frentiscao_images').getPublicUrl(filePath);
+
+      await _supabase.from('profiles').update({'avatar_url': imageUrl}).eq('id', user.id);
+
+      return imageUrl;
+    } catch (e) {
+      debugPrint('Erro ao fazer upload do avatar: $e');
+      return null;
+    }
+  }
+
+  /// Atualiza o nome e o telefone na tabela profiles
+  Future<bool> updateProfileData(String name, String phone) async {
+    try {
+      final user = _requireAuthenticatedUser();
+      await _supabase.from('profiles').update({
+        'name': name,
+        'phone': phone,
+      }).eq('id', user.id);
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao atualizar perfil: $e');
+      return false;
+    }
+  }
 }
+
