@@ -128,7 +128,7 @@ class SupabaseDataService {
 
   Future<bool> togglePostLike(String postId) async {
     try {
-      final user = _requireAuthenticatedUser();
+      _requireAuthenticatedUser();
       
       await _supabase.rpc('toggle_post_like', params: {'p_post_id': postId});
 
@@ -141,7 +141,7 @@ class SupabaseDataService {
 
   Future<bool> toggleCampaignSave(String campaignId) async {
     try {
-      final user = _requireAuthenticatedUser();
+      _requireAuthenticatedUser();
       
       await _supabase.rpc('toggle_campaign_save', params: {'p_campaign_id': campaignId});
 
